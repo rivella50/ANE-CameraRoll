@@ -1,0 +1,7 @@
+<platform xmlns="http://ns.adobe.com/air/extension/3.6">
+    <sdkVersion>5.1</sdkVersion>
+    <linkerOptions>
+        <!-- to use the AssetsLibrary framework -->
+        <option>-framework AssetsLibrary</option>
+    </linkerOptions>
+</platform>

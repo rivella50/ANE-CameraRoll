@@ -4,8 +4,6 @@
 *.DS_Store
 *.flexLibProperties
 *.classpath
-bin/**
-release/**
 ActionScriptLibrary/bin
 DefaultLibrary/bin
 Release/ANE-CameraRoll.swc
