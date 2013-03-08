@@ -1,0 +1,15 @@
+*.actionScriptProperties
+*.project
+*.settings
+*.DS_Store
+*.flexLibProperties
+*.classpath
+bin/**
+release/**
+ActionScriptLibrary/bin
+DefaultLibrary/bin
+Release/ANE-CameraRoll.swc
+Release/build_ane.sh
+default/library.swf
+ios/library.swf
+xcuserdata
