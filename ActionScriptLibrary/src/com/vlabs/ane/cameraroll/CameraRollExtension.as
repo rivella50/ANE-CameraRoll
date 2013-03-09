@@ -22,12 +22,14 @@ package com.vlabs.ane.cameraroll
 		
 		private var _context:ExtensionContext;
 		
-		private var _array:Array;
+		// since thumbnails all have the same dimensions we store it in context after first retrieval
+		private var _thumbnailWidth:int;
+		private var _thumbnailHeight:int;
 		
 		public function CameraRollExtension()
 		{
 			_context = ExtensionContext.createExtensionContext("com.vlabs.ane.cameraroll", null); 
-			if ( !_context ) { 
+			if (!_context) { 
 				throw new Error( "CameraRoll native extension is not supported on this platform." ); 
 			}
 			
@@ -94,7 +96,7 @@ package com.vlabs.ane.cameraroll
 				var bitmap:BitmapData;
 				var dimensions:PhotoDimensions = getCurrentPhotoDimensions(PHOTO_TYPE_THUMBNAIL);
 				bitmap = new BitmapData(dimensions.width, dimensions.height);
-				drawFullScreenPhotoToBitmapData(bitmap);
+				drawPhotoToBitmapData(bitmap, PHOTO_TYPE_THUMBNAIL);
 				var event:PhotoAppEvent = new PhotoAppEvent(PhotoAppEvent.EVENT_FULLSCREEN_IMAGE_LOADED);
 				event.data = bitmap;
 				dispatchEvent(event);
@@ -104,7 +106,7 @@ package com.vlabs.ane.cameraroll
 				var bitmap:BitmapData;
 				var dimensions:PhotoDimensions = getCurrentPhotoDimensions(PHOTO_TYPE_FULL_SCREEN);
 				bitmap = new BitmapData(dimensions.width, dimensions.height);
-				drawFullScreenPhotoToBitmapData(bitmap);
+				drawPhotoToBitmapData(bitmap, PHOTO_TYPE_FULL_SCREEN);
 				var event:PhotoAppEvent = new PhotoAppEvent(PhotoAppEvent.EVENT_FULLSCREEN_IMAGE_LOADED);
 				event.data = bitmap;
 				dispatchEvent(event);
@@ -114,13 +116,21 @@ package com.vlabs.ane.cameraroll
 				var bitmap:BitmapData;
 				var dimensions:PhotoDimensions = getCurrentPhotoDimensions(PHOTO_TYPE_FULL_RESOLUTION);
 				bitmap = new BitmapData(dimensions.width, dimensions.height);
-				drawFullScreenPhotoToBitmapData(bitmap);
+				drawPhotoToBitmapData(bitmap, PHOTO_TYPE_FULL_RESOLUTION);
 				var event:PhotoAppEvent = new PhotoAppEvent(PhotoAppEvent.EVENT_FULLSCREEN_IMAGE_LOADED);
 				event.data = bitmap;
 				dispatchEvent(event);
 				return;
 			}
 
+			
+		}
+		
+		/**
+		 * 
+		 */
+		private function assertThumbnailPhotoDimensions():void {
+			
 			
 		}
 		
@@ -178,9 +188,19 @@ package com.vlabs.ane.cameraroll
 			_context.call("loadPhotoForUrl", url, LOAD_PHOTO_TYPE_FULL_RESOLUTION);
 		}
 		
-		public function loadPhotoAtIndex(index:int, notify:String = "LOAD_SINGLE_PHOTO_ASSET_COMPLETED"):void {
+		public function loadThumbnailPhotoAtIndex(index:int):void {
 			
-			_context.call("loadPhotoAtIndex", index, notify);
+			_context.call("loadPhotoAtIndex", index, LOAD_PHOTO_TYPE_THUMBNAIL);
+		}
+		
+		public function loadFullScreenPhotoAtIndex(index:int):void {
+			
+			_context.call("loadPhotoAtIndex", index, LOAD_PHOTO_TYPE_FULL_SCREEN);
+		}
+		
+		public function loadFullResolutionPhotoAtIndex(index:int):void {
+			
+			_context.call("loadPhotoAtIndex", index, LOAD_PHOTO_TYPE_FULL_RESOLUTION);
 		}
 		
 		public function getCurrentPhotoDimensions(type:String = PHOTO_TYPE_THUMBNAIL):PhotoDimensions {
@@ -188,9 +208,9 @@ package com.vlabs.ane.cameraroll
 			return _context.call("getCurrentPhotoDimensions", type) as PhotoDimensions;
 		}
 		
-		public function drawFullScreenPhotoToBitmapData(bitmapData:BitmapData):void {
+		private function drawPhotoToBitmapData(bitmapData:BitmapData, type:String):void {
 			
-			_context.call("drawFullScreenPhotoToBitmapData", bitmapData);
+			_context.call("drawPhotoToBitmapData", bitmapData, type);
 		}
 	}
 }

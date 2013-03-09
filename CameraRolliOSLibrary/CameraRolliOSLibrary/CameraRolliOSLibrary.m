@@ -232,26 +232,41 @@ FREObject GetThumbnailPhotoDimensions(FREContext ctx, void* funcData, uint32_t a
 }
 
 // Draws the current loaded fullscreen asset into the passed BitmapData
-// params: BitmapData
-FREObject DrawFullScreenPhotoToBitmapData(FREContext ctx, void* funcData, uint32_t argc, FREObject argv[]) {
+// params: BitmapData, type (thumbnail, fullScreen, fullResolution)
+FREObject DrawPhotoToBitmapData(FREContext ctx, void* funcData, uint32_t argc, FREObject argv[]) {
     
     NSLog(@"Entering DrawFullScreenPhotoToBitmapData()");
     // Get the AS3 BitmapData
     FREBitmapData bitmapData;
     FREAcquireBitmapData(argv[0], &bitmapData);
+    UIImage *image;
+    // getting the type
+    uint32_t typeLength;
+    const uint8_t *type;
+    FREGetObjectAsUTF8(argv[1], &typeLength, &type);
+    NSString *typeString = [NSString stringWithUTF8String:(char*)type];
+
     
-    UIImage *image = [UIImage imageWithCGImage:currentAsset.defaultRepresentation.fullScreenImage];
+    if (currentAsset) {
+        if ([typeString isEqualToString:@"thumbnail"]) {
+            image = [UIImage imageWithCGImage:[currentAsset thumbnail]];
+        } else if ([typeString isEqualToString:@"fullScreen"]) {
+            image = [UIImage imageWithCGImage:currentAsset.defaultRepresentation.fullScreenImage];
+        } else if ([typeString isEqualToString:@"fullResolution"]) {
+            image = [UIImage imageWithCGImage:currentAsset.defaultRepresentation.fullResolutionImage];
+        }
     
-    if (image) {
-        NSLog(@"Found image");
+        if (image) {
+            NSLog(@"Found image");
         
-        imageToBitmapData(image, bitmapData);
+            imageToBitmapData(image, bitmapData);
         
-        // Tell Flash which region of the BitmapData changes (all of it here)
-        FREInvalidateBitmapDataRect(argv[0], 0, 0, bitmapData.width, bitmapData.height);
+            // Tell Flash which region of the BitmapData changes (all of it here)
+            FREInvalidateBitmapDataRect(argv[0], 0, 0, bitmapData.width, bitmapData.height);
         
-        // Release our control over the BitmapData
-        FREReleaseBitmapData(argv[0]);
+            // Release our control over the BitmapData
+            FREReleaseBitmapData(argv[0]);
+        }
     }
     
     NSLog(@"Exiting DrawFullScreenPhotoToBitmapData()");
@@ -499,9 +514,9 @@ void CameraRollContextInitializer(void* extData, const uint8_t* ctxType, FRECont
 	func[9].functionData = NULL;
 	func[9].function = &GetThumbnailPhotoDimensions;
     
-    func[10].name = (const uint8_t*) "drawFullScreenPhotoToBitmapData";
+    func[10].name = (const uint8_t*) "drawPhotoToBitmapData";
 	func[10].functionData = NULL;
-	func[10].function = &DrawFullScreenPhotoToBitmapData;
+	func[10].function = &DrawPhotoToBitmapData;
 	
 	//Just for consistency with Android
 	func[11].name = (const uint8_t*) "initNativeCode";

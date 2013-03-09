@@ -65,7 +65,15 @@ package com.vlabs.ane.cameraroll
 			
 		}
 		
-		public function loadPhotoAtIndex(index:int, notify:String = "LOAD_SINGLE_PHOTO_ASSET_COMPLETED"):void {
+		public function loadThumbnailPhotoAtIndex(index:int):void {
+			
+		}
+		
+		public function loadFullScreenPhotoAtIndex(index:int):void {
+			
+		}
+		
+		public function loadFullResolutionPhotoAtIndex(index:int):void {
 			
 		}
 		
@@ -74,10 +82,7 @@ package com.vlabs.ane.cameraroll
 			return null;
 		}
 		
-		
-		
-		public function drawFullScreenPhotoToBitmapData(bitmapData:BitmapData):void {
-			
+		private function drawPhotoToBitmapData(bitmapData:BitmapData, type:String):void {
 			
 		}
 	}
