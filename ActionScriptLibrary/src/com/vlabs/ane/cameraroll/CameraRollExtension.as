@@ -10,6 +10,14 @@ package com.vlabs.ane.cameraroll
 	[Event(name=PhotoAppEvent.type, type="com.vlabs.ane.cameraroll.PhotoAppEvent")]
 	public class CameraRollExtension extends EventDispatcher
 	{
+		private static const LOAD_PHOTO_TYPE_THUMBNAIL:String = "loadPhotoTypeThumbnail";
+		private static const LOAD_PHOTO_TYPE_FULL_SCREEN:String = "loadPhotoTypeFullScreen";
+		private static const LOAD_PHOTO_TYPE_FULL_RESOLUTION:String = "loadPhotoTypeFullResolution";
+		
+		private static const PHOTO_TYPE_THUMBNAIL:String = "thumbnail";
+		private static const PHOTO_TYPE_FULL_SCREEN:String = "fullScreen";
+		private static const PHOTO_TYPE_FULL_RESOLUTION:String = "fullResolution";
+		
 		private static var _instance:CameraRollExtension;
 		
 		private var _context:ExtensionContext;
@@ -36,6 +44,7 @@ package com.vlabs.ane.cameraroll
 				event.data = e.level;
 				trace("received status event for count photos request ", e.level);
 				dispatchEvent(event);
+				
 			} else if (e.code == "LOAD_PHOTO_THUMBNAILS_COMPLETED") {
 				
 				var bitmap:BitmapData;
@@ -80,13 +89,31 @@ package com.vlabs.ane.cameraroll
 				}
 				
 				
-			} else if (e.code == "LOAD_SINGLE_PHOTO_ASSET_COMPLETED") {
+			} else if (e.code == LOAD_PHOTO_TYPE_THUMBNAIL) {
 				
 				var bitmap:BitmapData;
-				//var dimensions:PhotoDimensions = _context.call("getCurrentFullScreenPhotoDimensions", null) as PhotoDimensions;
-				var dimensions:PhotoDimensions = getCurrentFullScreenPhotoDimensions();
+				var dimensions:PhotoDimensions = getCurrentPhotoDimensions(PHOTO_TYPE_THUMBNAIL);
 				bitmap = new BitmapData(dimensions.width, dimensions.height);
-				//_context.call("drawFullScreenPhotoToBitmapData", bitmap);
+				drawFullScreenPhotoToBitmapData(bitmap);
+				var event:PhotoAppEvent = new PhotoAppEvent(PhotoAppEvent.EVENT_FULLSCREEN_IMAGE_LOADED);
+				event.data = bitmap;
+				dispatchEvent(event);
+				return;
+			} else if (e.code == LOAD_PHOTO_TYPE_FULL_SCREEN) {
+				
+				var bitmap:BitmapData;
+				var dimensions:PhotoDimensions = getCurrentPhotoDimensions(PHOTO_TYPE_FULL_SCREEN);
+				bitmap = new BitmapData(dimensions.width, dimensions.height);
+				drawFullScreenPhotoToBitmapData(bitmap);
+				var event:PhotoAppEvent = new PhotoAppEvent(PhotoAppEvent.EVENT_FULLSCREEN_IMAGE_LOADED);
+				event.data = bitmap;
+				dispatchEvent(event);
+				return;
+			} else if (e.code == LOAD_PHOTO_TYPE_FULL_RESOLUTION) {
+				
+				var bitmap:BitmapData;
+				var dimensions:PhotoDimensions = getCurrentPhotoDimensions(PHOTO_TYPE_FULL_RESOLUTION);
+				bitmap = new BitmapData(dimensions.width, dimensions.height);
 				drawFullScreenPhotoToBitmapData(bitmap);
 				var event:PhotoAppEvent = new PhotoAppEvent(PhotoAppEvent.EVENT_FULLSCREEN_IMAGE_LOADED);
 				event.data = bitmap;
@@ -136,14 +163,29 @@ package com.vlabs.ane.cameraroll
 			return _context.call("getPhotoInfos", startIndex, length) as Array;
 		}
 		
-		public function loadPhotoFullScreen(url:String):void {
+		public function loadThumbnailPhotoForUrl(url:String):void {
 			
-			_context.call("loadPhotoFullScreen", url);
+			_context.call("loadPhotoForUrl", url, LOAD_PHOTO_TYPE_THUMBNAIL);
 		}
 		
-		public function getCurrentFullScreenPhotoDimensions():PhotoDimensions {
+		public function loadFullScreenPhotoForUrl(url:String):void {
 			
-			return _context.call("getCurrentFullScreenPhotoDimensions", null) as PhotoDimensions;
+			_context.call("loadPhotoForUrl", url, LOAD_PHOTO_TYPE_FULL_SCREEN);
+		}
+		
+		public function loadFullResolutionPhotoForUrl(url:String):void {
+			
+			_context.call("loadPhotoForUrl", url, LOAD_PHOTO_TYPE_FULL_RESOLUTION);
+		}
+		
+		public function loadPhotoAtIndex(index:int, notify:String = "LOAD_SINGLE_PHOTO_ASSET_COMPLETED"):void {
+			
+			_context.call("loadPhotoAtIndex", index, notify);
+		}
+		
+		public function getCurrentPhotoDimensions(type:String = PHOTO_TYPE_THUMBNAIL):PhotoDimensions {
+			
+			return _context.call("getCurrentPhotoDimensions", type) as PhotoDimensions;
 		}
 		
 		public function drawFullScreenPhotoToBitmapData(bitmapData:BitmapData):void {

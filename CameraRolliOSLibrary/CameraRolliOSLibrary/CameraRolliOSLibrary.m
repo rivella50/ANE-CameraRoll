@@ -19,7 +19,7 @@ FREContext g_ctx;
 FREObject thumbsArray;
 NSMutableArray *thumbs; // DEPRECATED
 NSMutableArray *assets;
-ALAsset *currentFullscreenAsset;
+ALAsset *currentAsset;
 ALAssetsLibrary *library;
 
 
@@ -98,13 +98,13 @@ FREObject DrawThumbnailAtIndexToBitmapData(FREContext ctx, void* funcData, uint3
     return nil;
 }
 
-// gets an url and tries to load the full screen image for that photo
+// gets an url and tries to load the photo
 // async method
-// params: url
-FREObject LoadPhotoFullScreen(FREContext ctx, void* funcData, uint32_t argc, FREObject argv[]) {
+// params: url, notifystring
+FREObject LoadPhotoForUrl(FREContext ctx, void* funcData, uint32_t argc, FREObject argv[]) {
     
-    NSLog(@"Entering LoadPhotoFullScreen()");
-    currentFullscreenAsset = NULL;
+    NSLog(@"Entering LoadPhotoForUrl()");
+    currentAsset = NULL;
     
     // getting the url
     uint32_t urlLength;
@@ -112,29 +112,94 @@ FREObject LoadPhotoFullScreen(FREContext ctx, void* funcData, uint32_t argc, FRE
     FREGetObjectAsUTF8(argv[0], &urlLength, &url);
     NSString *urlString = [NSString stringWithUTF8String:(char*)url];
     
+    // getting the notifystring
+    uint32_t notifyLength;
+    const uint8_t *notify;
+    FREGetObjectAsUTF8(argv[1], &notifyLength, &notify);
+    NSString *notifyString = [NSString stringWithUTF8String:(char*)notify];
+    
     // now retrieve the image: http://stackoverflow.com/questions/7221167/how-to-check-if-an-alasset-still-exists-using-a-url
     NSURL *assetUrl = [NSURL URLWithString:urlString];
     [library assetForURL:assetUrl resultBlock:^(ALAsset *asset) {
         if (asset) {
-            currentFullscreenAsset = asset;
-            NSLog(@"The asset for url %@ has been found", urlString);
-            FREDispatchStatusEventAsync(g_ctx, (const uint8_t*)"LOAD_SINGLE_PHOTO_ASSET_COMPLETED", (uint8_t*)"");
+            currentAsset = asset;
+            NSLog(@"The asset for url %@ has been found. Now notify for type %@ ", urlString, notifyString);
+            FREDispatchStatusEventAsync(g_ctx, (const uint8_t*)[notifyString UTF8String], (uint8_t*)"");
         }
     } failureBlock:^(NSError *error) {
         
     }];
 
-    NSLog(@"Exiting LoadPhotoFullScreen()");
+    NSLog(@"Exiting LoadPhotoForUrl()");
     
     return NULL;
 }
 
-FREObject GetCurrentFullScreenPhotoDimensions(FREContext ctx, void* funcData, uint32_t argc, FREObject argv[]) {
+// gets an index and tries to load the photo
+// async method
+// params: index, notifystring
+FREObject LoadPhotoAtIndex(FREContext ctx, void* funcData, uint32_t argc, FREObject argv[]) {
     
-    NSLog(@"Entering GetCurrentFullScreenPhotoDimensions()");
+    NSLog(@"Entering LoadPhotoAtIndex()");
+    currentAsset = NULL;
+    
+    // getting the index
+    uint32_t index;
+    FREObject indexObject = argv[0];
+    FREGetObjectAsUint32(indexObject, &index);
+    
+    // getting the notifystring
+    uint32_t notifyLength;
+    const uint8_t *notify;
+    FREGetObjectAsUTF8(argv[1], &notifyLength, &notify);
+    NSString *notifyString = [NSString stringWithUTF8String:(char*)notify];
+    
+    [library enumerateGroupsWithTypes:ALAssetsGroupSavedPhotos usingBlock:^(ALAssetsGroup *group, BOOL *stop) {
+        
+        // Within the group enumeration block, filter to enumerate just photos.
+        [group setAssetsFilter:[ALAssetsFilter allPhotos]];
+        
+        // Chooses the photo at the given index
+        [group enumerateAssetsAtIndexes:[NSIndexSet indexSetWithIndex:index] options:0 usingBlock:^(ALAsset *asset, NSUInteger index, BOOL *innerStop) {
+            
+            // The end of the enumeration is signaled by asset == nil.
+            if (asset) {
+                currentAsset = asset;
+                NSLog(@"The asset at index %d has been found", index);
+                FREDispatchStatusEventAsync(g_ctx, (const uint8_t*)[notifyString UTF8String], (uint8_t*)"");
+            }
+        }];
+    } failureBlock: ^(NSError *error) {
+        
+    }];
+
+    NSLog(@"Exiting LoadPhotoAtIndex()");
+    
+    return NULL;
+}
+
+// gets the dimension for the current loaded photo
+// sync method
+// params: type (thumbnail, fullScreen, fullResolution)
+FREObject GetCurrentPhotoDimensions(FREContext ctx, void* funcData, uint32_t argc, FREObject argv[]) {
+    
+    NSLog(@"Entering GetCurrentPhotoDimensions()");
     FREObject data = NULL;
-    if (currentFullscreenAsset) {
-        UIImage *image = [UIImage imageWithCGImage:currentFullscreenAsset.defaultRepresentation.fullScreenImage];
+    UIImage *image;
+    // getting the type
+    uint32_t typeLength;
+    const uint8_t *type;
+    FREGetObjectAsUTF8(argv[0], &typeLength, &type);
+    NSString *typeString = [NSString stringWithUTF8String:(char*)type];
+    
+    if (currentAsset) {
+        if ([typeString isEqualToString:@"thumbnail"]) {
+            image = [UIImage imageWithCGImage:[currentAsset thumbnail]];
+        } else if ([typeString isEqualToString:@"fullScreen"]) {
+            image = [UIImage imageWithCGImage:currentAsset.defaultRepresentation.fullScreenImage];
+        } else if ([typeString isEqualToString:@"fullResolution"]) {
+            image = [UIImage imageWithCGImage:currentAsset.defaultRepresentation.fullResolutionImage];
+        }
         CGImageRef imageRef = [image CGImage];
         NSUInteger width = CGImageGetWidth(imageRef);
         NSUInteger height = CGImageGetHeight(imageRef);
@@ -150,7 +215,19 @@ FREObject GetCurrentFullScreenPhotoDimensions(FREContext ctx, void* funcData, ui
     }
     
 
-    NSLog(@"Exiting GetCurrentFullScreenPhotoDimensions()");
+    NSLog(@"Exiting GetCurrentPhotoDimensions() for type %@", typeString);
+    return data;
+}
+
+// If CameraRoll is not empty ask the first photo about its dimensions
+FREObject GetThumbnailPhotoDimensions(FREContext ctx, void* funcData, uint32_t argc, FREObject argv[]) {
+    
+    NSLog(@"Entering GetThumbnailPhotoDimensions()");
+    FREObject data = NULL;
+    
+    
+    
+    NSLog(@"Exiting GetThumbnailPhotoDimensions()");
     return data;
 }
 
@@ -163,7 +240,7 @@ FREObject DrawFullScreenPhotoToBitmapData(FREContext ctx, void* funcData, uint32
     FREBitmapData bitmapData;
     FREAcquireBitmapData(argv[0], &bitmapData);
     
-    UIImage *image = [UIImage imageWithCGImage:currentFullscreenAsset.defaultRepresentation.fullScreenImage];
+    UIImage *image = [UIImage imageWithCGImage:currentAsset.defaultRepresentation.fullScreenImage];
     
     if (image) {
         NSLog(@"Found image");
@@ -378,7 +455,7 @@ void CameraRollContextInitializer(void* extData, const uint8_t* ctxType, FRECont
     
     NSLog(@"Entering CameraRollContextInitializer()");
     
-	*numFunctionsToTest = 10;
+	*numFunctionsToTest = 12;
     
 	FRENamedFunction* func = (FRENamedFunction*) malloc(sizeof(FRENamedFunction) * *numFunctionsToTest);
 	
@@ -406,22 +483,30 @@ void CameraRollContextInitializer(void* extData, const uint8_t* ctxType, FRECont
 	func[5].functionData = NULL;
 	func[5].function = &CopyThumbnailJPEGRepresentationAtIndexToByteArray;
     
-    func[6].name = (const uint8_t*) "loadPhotoFullScreen";
+    func[6].name = (const uint8_t*) "loadPhotoForUrl";
 	func[6].functionData = NULL;
-	func[6].function = &LoadPhotoFullScreen;
+	func[6].function = &LoadPhotoForUrl;
     
-    func[7].name = (const uint8_t*) "getCurrentFullScreenPhotoDimensions";
+    func[7].name = (const uint8_t*) "loadPhotoAtIndex";
 	func[7].functionData = NULL;
-	func[7].function = &GetCurrentFullScreenPhotoDimensions;
+	func[7].function = &LoadPhotoAtIndex;
     
-    func[8].name = (const uint8_t*) "drawFullScreenPhotoToBitmapData";
+    func[8].name = (const uint8_t*) "getCurrentPhotoDimensions";
 	func[8].functionData = NULL;
-	func[8].function = &DrawFullScreenPhotoToBitmapData;
+	func[8].function = &GetCurrentPhotoDimensions;
+    
+    func[9].name = (const uint8_t*) "getThumbnailPhotoDimensions";
+	func[9].functionData = NULL;
+	func[9].function = &GetThumbnailPhotoDimensions;
+    
+    func[10].name = (const uint8_t*) "drawFullScreenPhotoToBitmapData";
+	func[10].functionData = NULL;
+	func[10].function = &DrawFullScreenPhotoToBitmapData;
 	
 	//Just for consistency with Android
-	func[9].name = (const uint8_t*) "initNativeCode";
-	func[9].functionData = NULL;
-	func[9].function = &InitNativeCode;
+	func[11].name = (const uint8_t*) "initNativeCode";
+	func[11].functionData = NULL;
+	func[11].function = &InitNativeCode;
     
 	*functionsToSet = func;
     
@@ -447,7 +532,7 @@ void CameraRollContextFinalizer(FREContext ctx) {
     library = NULL;
     thumbs = NULL;
     assets = NULL;
-    currentFullscreenAsset = NULL;
+    currentAsset = NULL;
     
     NSLog(@"Exiting CameraRollContextFinalizer()");
     

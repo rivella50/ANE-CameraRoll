@@ -53,14 +53,28 @@ package com.vlabs.ane.cameraroll
 			return [];
 		}
 		
-		public function loadPhotoFullScreen(url:String):void {
+		public function loadThumbnailPhotoForUrl(url:String):void {
 			
 		}
 		
-		public function getCurrentFullScreenPhotoDimensions():PhotoDimensions {
+		public function loadFullScreenPhotoForUrl(url:String):void {
+			
+		}
+		
+		public function loadFullResolutionPhotoForUrl(url:String):void {
+			
+		}
+		
+		public function loadPhotoAtIndex(index:int, notify:String = "LOAD_SINGLE_PHOTO_ASSET_COMPLETED"):void {
+			
+		}
+		
+		public function getCurrentPhotoDimensions(type:String = "thumbnail"):PhotoDimensions {
 			
 			return null;
 		}
+		
+		
 		
 		public function drawFullScreenPhotoToBitmapData(bitmapData:BitmapData):void {
 			

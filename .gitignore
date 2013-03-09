@@ -8,6 +8,6 @@ ActionScriptLibrary/bin
 DefaultLibrary/bin
 Release/ANE-CameraRoll.swc
 Release/build_ane.sh
-default/library.swf
+library.swf
 ios/library.swf
 xcuserdata
