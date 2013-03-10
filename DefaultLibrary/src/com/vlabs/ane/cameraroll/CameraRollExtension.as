@@ -35,16 +35,13 @@ package com.vlabs.ane.cameraroll
 			
 		}
 		
-		public function sayHello(name:String):String {
-			
-			return "";
-		}
+		
 		
 		public function countPhotos():void {
 			
 		}
 		
-		public function loadPhotoThumbnails3():void {
+		public function loadPhotoAssets():void {
 			
 		}
 		

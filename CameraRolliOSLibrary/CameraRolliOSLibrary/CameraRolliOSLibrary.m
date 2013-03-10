@@ -16,20 +16,29 @@
 #import "CameraRolliOSLibrary.h"
 
 FREContext g_ctx;
-FREObject thumbsArray;
-NSMutableArray *thumbs; // DEPRECATED
 NSMutableArray *assets;
 ALAsset *currentAsset;
 ALAssetsLibrary *library;
 
 
-// WORKS
-FREObject LoadPhotoThumbnails3(FREContext ctx, void* funcData, uint32_t argc, FREObject argv[]) {
+// loads an amount of photo assets, depending on the given start index and the amount
+// async method
+// params: startIndex, amount
+FREObject LoadPhotoAssets(FREContext ctx, void* funcData, uint32_t argc, FREObject argv[]) {
     
-    NSLog(@"Entering LoadPhotoThumbnails3()");
+    NSLog(@"Entering LoadPhotoAssets()");
     
-    [thumbs removeAllObjects];
     [assets removeAllObjects];
+    
+    // get the start index (offset)
+    uint32_t offset;
+    FREObject offsetObject = argv[0];
+    FREGetObjectAsUint32(offsetObject, &offset);
+    
+    // and the amount of photos to load in this step
+    uint32_t amount;
+    FREObject amountObject = argv[1];
+    FREGetObjectAsUint32(amountObject, &amount);
     
     [library enumerateGroupsWithTypes:ALAssetsGroupSavedPhotos usingBlock:^(ALAssetsGroup *group, BOOL *stop) {
         
@@ -42,17 +51,20 @@ FREObject LoadPhotoThumbnails3(FREContext ctx, void* funcData, uint32_t argc, FR
             FREDispatchStatusEventAsync(g_ctx, (const uint8_t*)"LOAD_PHOTO_THUMBNAILS_COMPLETED", (uint8_t*)[result UTF8String]);
         } else {
             [group setAssetsFilter:[ALAssetsFilter allPhotos]];
-            //NSInteger numberOfAssets = [group numberOfAssets];
-            NSInteger numberOfAssets = 20;
-            int i;
-            for (i = 0; i < numberOfAssets; i++)  {
-                [group enumerateAssetsAtIndexes:[NSIndexSet indexSetWithIndex:i] options:0 usingBlock:^(ALAsset *asset, NSUInteger index, BOOL *stop) {
-                    if (asset) {
-                        //[thumbs addObject:[UIImage imageWithCGImage:[asset thumbnail]]];
-                        [assets addObject:asset];
-                    }
-                }];
+            NSInteger totalCount = [group numberOfAssets];
+            if (offset < totalCount) {
+                NSInteger difference = (totalCount - offset);
+                NSInteger realAmount = (difference < amount) ? difference : amount;
+                int i;
+                for (i = offset; i < (offset + realAmount); i++)  {
+                    [group enumerateAssetsAtIndexes:[NSIndexSet indexSetWithIndex:i] options:0 usingBlock:^(ALAsset *asset, NSUInteger index, BOOL *stop) {
+                        if (asset) {
+                            [assets addObject:asset];
+                        }
+                    }];
+                }
             }
+                        
         }
     }
     failureBlock:^(NSError *err) {
@@ -62,7 +74,7 @@ FREObject LoadPhotoThumbnails3(FREContext ctx, void* funcData, uint32_t argc, FR
     ];
     
     
-    NSLog(@"Exiting LoadPhotoThumbnails3()");
+    NSLog(@"Exiting LoadPhotoAssets()");
     
     return NULL;
 }
@@ -474,9 +486,9 @@ void CameraRollContextInitializer(void* extData, const uint8_t* ctxType, FRECont
     
 	FRENamedFunction* func = (FRENamedFunction*) malloc(sizeof(FRENamedFunction) * *numFunctionsToTest);
 	
-    func[0].name = (const uint8_t*) "loadPhotoThumbnails3";
+    func[0].name = (const uint8_t*) "loadPhotoAssets";
 	func[0].functionData = NULL;
-	func[0].function = &LoadPhotoThumbnails3;
+	func[0].function = &LoadPhotoAssets;
     
     func[1].name = (const uint8_t*) "drawThumbnailAtIndexToBitmapData";
 	func[1].functionData = NULL;
@@ -527,7 +539,6 @@ void CameraRollContextInitializer(void* extData, const uint8_t* ctxType, FRECont
     
     g_ctx = ctx;
     library = [[ALAssetsLibrary alloc] init];
-    thumbs = [[NSMutableArray alloc] init];
     assets = [[NSMutableArray alloc] init];
     
     NSLog(@"Exiting CameraRollContextInitializer()");
@@ -545,7 +556,6 @@ void CameraRollContextFinalizer(FREContext ctx) {
     NSLog(@"Entering CameraRollContextFinalizer()");
     
     library = NULL;
-    thumbs = NULL;
     assets = NULL;
     currentAsset = NULL;
     

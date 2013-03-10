@@ -153,19 +153,15 @@ package com.vlabs.ane.cameraroll
 			_context.call("initNativeCode", null);
 		}
 		
-		public function sayHello(name:String):String {
-			
-			return _context.call("sayHello", "Hello ", name) as String;
-		}
 		
 		public function countPhotos():void {
 			
 			_context.call("countPhotos", null);
 		}
 		
-		public function loadPhotoThumbnails3():void {
+		public function loadPhotoAssets(startIndex:int, amount:int):void {
 			
-			_context.call("loadPhotoThumbnails3", null);
+			_context.call("loadPhotoAssets", startIndex, amount);
 		}
 		
 		public function getPhotoInfos(startIndex:int, length:int):Array {
