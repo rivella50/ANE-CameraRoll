@@ -44,11 +44,9 @@ FREObject LoadPhotoAssets(FREContext ctx, void* funcData, uint32_t argc, FREObje
         
         if (group == nil) {
             NSInteger numberOfPhotos = [assets count];
-            
-            
-            //NSLog(@"The final array has a size of %d", numberOfPhotos);
+                    
             NSString *result = [NSString stringWithFormat:@"%d",(int)numberOfPhotos];
-            FREDispatchStatusEventAsync(g_ctx, (const uint8_t*)"LOAD_PHOTO_THUMBNAILS_COMPLETED", (uint8_t*)[result UTF8String]);
+            FREDispatchStatusEventAsync(g_ctx, (const uint8_t*)"loadPhotoTypeThumbnails", (uint8_t*)[result UTF8String]);
         } else {
             [group setAssetsFilter:[ALAssetsFilter allPhotos]];
             NSInteger totalCount = [group numberOfAssets];
@@ -149,14 +147,32 @@ FREObject LoadPhotoForUrl(FREContext ctx, void* funcData, uint32_t argc, FREObje
 
 // gets a list of urls and recursively loads the photos into assets array
 // see: http://www.calebmadrigal.com/functional-programming-deal-asynchronicity-objective-c/
+// see: http://stackoverflow.com/questions/15328101/how-to-load-several-photos-with-assetforurl-with-a-list-of-urls
 // async
 // params: list of asset urls
 FREObject LoadPhotosForUrls(FREContext ctx, void* funcData, uint32_t argc, FREObject argv[]) {
     
     NSLog(@"Entering LoadPhotosForUrls()");
-    //NSMutableArray *imageCollection = [NSThread detachNewThreadSelector:@selector (loadImages:) toTarget:self withObject:imageUrlsCollection];
     
-    NSLog(@"Exiting LoadPhotosForUrls()");
+    [assets removeAllObjects];
+    
+    // getting the array of urls
+    FREObject arr = argv[0];
+    uint32_t arr_len;
+    FREGetArrayLength(arr, &arr_len);
+    
+    // notify string
+    FREObject result;
+    const char *resultString = "loadPhotoTypeThumbnailsForUrls";
+    FRENewObjectFromUTF8(strlen(resultString)+1, (const uint8_t *) resultString, &result);
+    NSString *notifyString = @"loadPhotoTypeThumbnailsForUrls";
+    
+    loadImagesForUrls(arr, assets, notifyString);
+    //NSInteger numberOfPhotos = [assets count];
+    //NSString *result = [NSString stringWithFormat:@"%d",(int)numberOfPhotos];
+    //FREDispatchStatusEventAsync(g_ctx, (const uint8_t*)"loadPhotoTypeThumbnailsForUrls", (uint8_t*)[result UTF8String]);
+    
+    //NSLog(@"Exiting LoadPhotosForUrls() with %d loaded assets", numberOfPhotos);
     return NULL;
 }
 
@@ -664,21 +680,38 @@ void imageToBitmapData(UIImage *image, FREBitmapData bitmapData)
     //NSLog(@"Exiting imageToBitmapData()");
 }
 
-NSMutableArray* loadImagesForUrls(NSArray *imageUrls) {
+void loadImagesForUrls(FREObject imageUrls, NSMutableArray *loadedImages, NSString *notifyString) {
     
-    NSMutableArray *loadedImages = [[NSMutableArray alloc] init];
+    NSLog(@"Entering loadImagesForUrls()");
+    uint32_t arr_len;
+    FREGetArrayLength(imageUrls, &arr_len);
+    
     @try
     {
-        for(int index = 0; index < [imageUrls count]; index++)
+        for (int index = 0; index < arr_len; index++)
         {
-            NSURL *url = [imageUrls objectAtIndex:index];
+            FREObject element;
+            FREGetArrayElementAt(imageUrls, index, &element);
+            // getting the url
+            uint32_t urlLength;
+            const uint8_t *urlParam;
+            FREGetObjectAsUTF8(element, &urlLength, &urlParam);
+            NSString *urlString = [NSString stringWithUTF8String:(char*)urlParam];
+            NSURL *assetUrl = [NSURL URLWithString:urlString];
             
-            [library assetForURL:url resultBlock:^(ALAsset *asset) {
-                                
+            [library assetForURL:assetUrl resultBlock:^(ALAsset *asset) {
+                
+                
                 dispatch_async(dispatch_get_main_queue(), ^{
                     
                     if (asset) {
+                        NSLog(@"Adding asset to assets list.");
                         [loadedImages addObject:asset];
+                    }
+                    
+                    if (index == (arr_len - 1)) {
+                        NSString *result = [NSString stringWithFormat:@"%d",(int)arr_len];
+                        FREDispatchStatusEventAsync(g_ctx, (const uint8_t*)[notifyString UTF8String], (uint8_t*)[result UTF8String]);
                     }
                     
                 });
@@ -697,6 +730,6 @@ NSMutableArray* loadImagesForUrls(NSArray *imageUrls) {
     @finally
     {
         NSLog(@"Finished loadImagesForUrls");
-        return loadedImages;
+        return;
     }
 }

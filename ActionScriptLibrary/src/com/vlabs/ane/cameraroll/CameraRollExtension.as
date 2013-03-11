@@ -10,6 +10,9 @@ package com.vlabs.ane.cameraroll
 	[Event(name=PhotoAppEvent.type, type="com.vlabs.ane.cameraroll.PhotoAppEvent")]
 	public class CameraRollExtension extends EventDispatcher
 	{
+		private static const LOAD_PHOTO_TYPE_THUMBNAILS:String = "loadPhotoTypeThumbnails";
+		private static const LOAD_PHOTO_TYPE_THUMBNAILS_FOR_URLS:String = "loadPhotoTypeThumbnailsForUrls";
+		
 		private static const LOAD_PHOTO_TYPE_THUMBNAIL:String = "loadPhotoTypeThumbnail";
 		private static const LOAD_PHOTO_TYPE_FULL_SCREEN:String = "loadPhotoTypeFullScreen";
 		private static const LOAD_PHOTO_TYPE_FULL_RESOLUTION:String = "loadPhotoTypeFullResolution";
@@ -41,7 +44,8 @@ package com.vlabs.ane.cameraroll
 		}
 		
 		protected function onStatusHandler(e:StatusEvent):void
-		{
+		{	
+			trace("status code is: ", e.code);
 			if (e.code == "COUNT_PHOTOS_COMPLETED")	{
 				
 				var event:PhotoAppEvent = new PhotoAppEvent(PhotoAppEvent.EVENT_COUNT_PHOTOS);
@@ -49,7 +53,7 @@ package com.vlabs.ane.cameraroll
 				trace("received status event for count photos request ", e.level);
 				dispatchEvent(event);
 				
-			} else if (e.code == "LOAD_PHOTO_THUMBNAILS_COMPLETED") {
+			} else if (e.code === LOAD_PHOTO_TYPE_THUMBNAILS) {
 				
 				var bitmap:BitmapData;
 				var byteArray:ByteArray;
@@ -92,6 +96,49 @@ package com.vlabs.ane.cameraroll
 					trace("there are no photos found in CameraRoll...");
 				}
 				
+				
+			} else if (e.code === LOAD_PHOTO_TYPE_THUMBNAILS_FOR_URLS) {
+			
+				var bitmap:BitmapData;
+				var byteArray:ByteArray;
+				var amount:int = int(e.level);
+				var object:PhotoObject;
+				var infos:Array;
+				if (amount > 0) {
+					
+					infos = getPhotoInfos(0, amount);
+					
+					var array:Array = [];
+					for (var i:int = 0; i < amount; i++) {
+						
+						object = new PhotoObject();
+						
+						// https://github.com/freshplanet/ANE-ImagePicker/blob/master/actionscript/src/com/freshplanet/ane/AirImagePicker/AirImagePicker.as
+						// 1st possibility: draw into a BitmapData
+						bitmap = new BitmapData(150, 150);
+						_context.call("drawThumbnailAtIndexToBitmapData", i, bitmap);
+						object.thumbnail = bitmap;
+						object.metadata = infos[i];
+						array.push(object);
+						
+						// 2nd possibility: copy bytes into a ByteArray
+						//byteArray = new ByteArray();
+						//byteArray.length = _context.call("getJPEGRepresentationSizeAtIndex", i) as int;
+						//_context.call("copyThumbnailJPEGRepresentationAtIndexToByteArray", i, byteArray);
+						//array.push(byteArray);
+						
+					}
+					
+					var event:PhotoAppEvent = new PhotoAppEvent(PhotoAppEvent.EVENT_THUMBS_FOR_URLS_LOADED);
+					event.data = array;
+					dispatchEvent(event);
+					return;
+					
+					
+				} else {
+					
+					trace("there are no photos for urls found in CameraRoll...");
+				}
 				
 			} else if (e.code == LOAD_PHOTO_TYPE_THUMBNAIL) {
 				
@@ -180,6 +227,11 @@ package com.vlabs.ane.cameraroll
 		public function loadPhotoAssets(startIndex:int, amount:int):void {
 			
 			_context.call("loadPhotoAssets", startIndex, amount);
+		}
+		
+		public function loadPhotosForUrls(urls:Array):void {
+			
+			_context.call("loadPhotosForUrls", urls);
 		}
 		
 		public function getPhotoInfos(startIndex:int, length:int):Array {

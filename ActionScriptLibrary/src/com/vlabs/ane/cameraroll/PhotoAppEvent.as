@@ -9,6 +9,7 @@ package com.vlabs.ane.cameraroll
 		public static const type:String = "PHOTO_APP_EVENT";
 		public static const EVENT_COUNT_PHOTOS:String = "eventCountPhotos";
 		public static const EVENT_THUMBS_LOADED:String = "eventThumbsLoaded";
+		public static const EVENT_THUMBS_FOR_URLS_LOADED:String = "eventThumbsForUrlsLoaded";
 		
 		public static const EVENT_THUMBNAIL_IMAGE_LOADED:String = "eventThumbnailImageLoaded";
 		public static const EVENT_FULL_SCREEN_IMAGE_LOADED:String = "eventFullScreenImageLoaded";

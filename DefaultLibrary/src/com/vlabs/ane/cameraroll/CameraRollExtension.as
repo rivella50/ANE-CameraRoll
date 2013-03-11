@@ -5,6 +5,9 @@ package com.vlabs.ane.cameraroll
 	
 	public class CameraRollExtension extends EventDispatcher
 	{
+		private static const LOAD_PHOTO_TYPE_THUMBNAILS:String = "loadPhotoTypeThumbnails";
+		private static const LOAD_PHOTO_TYPE_THUMBNAILS_FOR_URLS:String = "loadPhotoTypeThumbnailsForUrls";
+		
 		private static const LOAD_PHOTO_TYPE_THUMBNAIL:String = "loadPhotoTypeThumbnail";
 		private static const LOAD_PHOTO_TYPE_FULL_SCREEN:String = "loadPhotoTypeFullScreen";
 		private static const LOAD_PHOTO_TYPE_FULL_RESOLUTION:String = "loadPhotoTypeFullResolution";
@@ -46,6 +49,10 @@ package com.vlabs.ane.cameraroll
 		}
 		
 		public function loadPhotoAssets():void {
+			
+		}
+		
+		public function loadPhotosForUrls(urls:Array):void {
 			
 		}
 		
