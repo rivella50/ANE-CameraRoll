@@ -5,17 +5,19 @@ package com.vlabs.ane.cameraroll
 	
 	public class CameraRollExtension extends EventDispatcher
 	{
+		private static const LOAD_PHOTO_TYPE_THUMBNAIL:String = "loadPhotoTypeThumbnail";
+		private static const LOAD_PHOTO_TYPE_FULL_SCREEN:String = "loadPhotoTypeFullScreen";
+		private static const LOAD_PHOTO_TYPE_FULL_RESOLUTION:String = "loadPhotoTypeFullResolution";
+		
+		private static const LOAD_PHOTO_TYPE_THUMBNAIL_FOR_DIMENSIONS:String = "loadPhotoTypeThumbnailForDimensions";
+		
 		private static var _instance:CameraRollExtension;
 				
 		private var _array:Array;
 		
 		public function CameraRollExtension()
 		{
-			
-			
 		}
-		
-		
 		
 		public static function getInstance() : CameraRollExtension
 		{
@@ -35,7 +37,9 @@ package com.vlabs.ane.cameraroll
 			
 		}
 		
-		
+		public function determineThumbnailDefaultDimensions():void {
+			
+		}
 		
 		public function countPhotos():void {
 			
@@ -50,27 +54,27 @@ package com.vlabs.ane.cameraroll
 			return [];
 		}
 		
-		public function loadThumbnailPhotoForUrl(url:String):void {
+		public function loadThumbnailPhotoForUrl(url:String, type:String = LOAD_PHOTO_TYPE_THUMBNAIL):void {
 			
 		}
 		
-		public function loadFullScreenPhotoForUrl(url:String):void {
+		public function loadFullScreenPhotoForUrl(url:String, type:String = LOAD_PHOTO_TYPE_FULL_SCREEN):void {
 			
 		}
 		
-		public function loadFullResolutionPhotoForUrl(url:String):void {
+		public function loadFullResolutionPhotoForUrl(url:String, type:String = LOAD_PHOTO_TYPE_FULL_RESOLUTION):void {
 			
 		}
 		
-		public function loadThumbnailPhotoAtIndex(index:int):void {
+		public function loadThumbnailPhotoAtIndex(index:int, type:String = LOAD_PHOTO_TYPE_THUMBNAIL):void {
 			
 		}
 		
-		public function loadFullScreenPhotoAtIndex(index:int):void {
+		public function loadFullScreenPhotoAtIndex(index:int, type:String = LOAD_PHOTO_TYPE_FULL_SCREEN):void {
 			
 		}
 		
-		public function loadFullResolutionPhotoAtIndex(index:int):void {
+		public function loadFullResolutionPhotoAtIndex(index:int, type:String = LOAD_PHOTO_TYPE_FULL_RESOLUTION):void {
 			
 		}
 		

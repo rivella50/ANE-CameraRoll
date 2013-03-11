@@ -13,7 +13,7 @@
 
 FREResult FRENewObjectFromDate(NSDate* date, FREObject* asDate );
 void imageToBitmapData(UIImage *image, FREBitmapData bitmapData);
-
+NSMutableArray* loadImagesForUrls(NSArray *imageUrls);
 @end
 
 #endif

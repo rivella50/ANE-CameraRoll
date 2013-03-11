@@ -26,7 +26,7 @@ ALAssetsLibrary *library;
 // params: startIndex, amount
 FREObject LoadPhotoAssets(FREContext ctx, void* funcData, uint32_t argc, FREObject argv[]) {
     
-    NSLog(@"Entering LoadPhotoAssets()");
+    //NSLog(@"Entering LoadPhotoAssets()");
     
     [assets removeAllObjects];
     
@@ -46,7 +46,7 @@ FREObject LoadPhotoAssets(FREContext ctx, void* funcData, uint32_t argc, FREObje
             NSInteger numberOfPhotos = [assets count];
             
             
-            NSLog(@"The final array has a size of %d", numberOfPhotos);
+            //NSLog(@"The final array has a size of %d", numberOfPhotos);
             NSString *result = [NSString stringWithFormat:@"%d",(int)numberOfPhotos];
             FREDispatchStatusEventAsync(g_ctx, (const uint8_t*)"LOAD_PHOTO_THUMBNAILS_COMPLETED", (uint8_t*)[result UTF8String]);
         } else {
@@ -74,7 +74,7 @@ FREObject LoadPhotoAssets(FREContext ctx, void* funcData, uint32_t argc, FREObje
     ];
     
     
-    NSLog(@"Exiting LoadPhotoAssets()");
+    //NSLog(@"Exiting LoadPhotoAssets()");
     
     return NULL;
 }
@@ -84,7 +84,7 @@ FREObject LoadPhotoAssets(FREContext ctx, void* funcData, uint32_t argc, FREObje
 // https://github.com/freshplanet/ANE-ImagePicker/blob/master/ios/AirImagePicker/AirImagePicker.m
 FREObject DrawThumbnailAtIndexToBitmapData(FREContext ctx, void* funcData, uint32_t argc, FREObject argv[]) {
     
-    NSLog(@"Entering DrawThumbnailAtIndexToBitmapData()");
+    //NSLog(@"Entering DrawThumbnailAtIndexToBitmapData()");
     uint32_t index;
     FREObject indexObject = argv[0];
     FREGetObjectAsUint32(indexObject, &index);
@@ -96,7 +96,7 @@ FREObject DrawThumbnailAtIndexToBitmapData(FREContext ctx, void* funcData, uint3
     FREAcquireBitmapData(argv[1], &bitmapData);
     
     if (image) {
-        NSLog(@"Found image");
+        //NSLog(@"Found image");
         
         imageToBitmapData(image, bitmapData);
         
@@ -106,16 +106,16 @@ FREObject DrawThumbnailAtIndexToBitmapData(FREContext ctx, void* funcData, uint3
         // Release our control over the BitmapData
         FREReleaseBitmapData(argv[1]);
     }
-    NSLog(@"Exiting DrawThumbnailAtIndexToBitmapData()");
+    //NSLog(@"Exiting DrawThumbnailAtIndexToBitmapData()");
     return nil;
 }
 
-// gets an url and tries to load the photo
+// gets an url and tries to load the photo. the photo will be stored in currentAsset
 // async method
 // params: url, notifystring
 FREObject LoadPhotoForUrl(FREContext ctx, void* funcData, uint32_t argc, FREObject argv[]) {
     
-    NSLog(@"Entering LoadPhotoForUrl()");
+    //NSLog(@"Entering LoadPhotoForUrl()");
     currentAsset = NULL;
     
     // getting the url
@@ -135,24 +135,37 @@ FREObject LoadPhotoForUrl(FREContext ctx, void* funcData, uint32_t argc, FREObje
     [library assetForURL:assetUrl resultBlock:^(ALAsset *asset) {
         if (asset) {
             currentAsset = asset;
-            NSLog(@"The asset for url %@ has been found. Now notify for type %@ ", urlString, notifyString);
+            //NSLog(@"The asset for url %@ has been found. Now notify for type %@ ", urlString, notifyString);
             FREDispatchStatusEventAsync(g_ctx, (const uint8_t*)[notifyString UTF8String], (uint8_t*)"");
         }
     } failureBlock:^(NSError *error) {
         
     }];
 
-    NSLog(@"Exiting LoadPhotoForUrl()");
+    //NSLog(@"Exiting LoadPhotoForUrl()");
     
     return NULL;
 }
 
-// gets an index and tries to load the photo
+// gets a list of urls and recursively loads the photos into assets array
+// see: http://www.calebmadrigal.com/functional-programming-deal-asynchronicity-objective-c/
+// async
+// params: list of asset urls
+FREObject LoadPhotosForUrls(FREContext ctx, void* funcData, uint32_t argc, FREObject argv[]) {
+    
+    NSLog(@"Entering LoadPhotosForUrls()");
+    //NSMutableArray *imageCollection = [NSThread detachNewThreadSelector:@selector (loadImages:) toTarget:self withObject:imageUrlsCollection];
+    
+    NSLog(@"Exiting LoadPhotosForUrls()");
+    return NULL;
+}
+
+// gets an index and tries to load the photo. the photo will be stored in currentAsset
 // async method
 // params: index, notifystring
 FREObject LoadPhotoAtIndex(FREContext ctx, void* funcData, uint32_t argc, FREObject argv[]) {
     
-    NSLog(@"Entering LoadPhotoAtIndex()");
+    //NSLog(@"Entering LoadPhotoAtIndex()");
     currentAsset = NULL;
     
     // getting the index
@@ -177,7 +190,7 @@ FREObject LoadPhotoAtIndex(FREContext ctx, void* funcData, uint32_t argc, FREObj
             // The end of the enumeration is signaled by asset == nil.
             if (asset) {
                 currentAsset = asset;
-                NSLog(@"The asset at index %d has been found", index);
+                //NSLog(@"The asset at index %d has been found", index);
                 FREDispatchStatusEventAsync(g_ctx, (const uint8_t*)[notifyString UTF8String], (uint8_t*)"");
             }
         }];
@@ -185,7 +198,7 @@ FREObject LoadPhotoAtIndex(FREContext ctx, void* funcData, uint32_t argc, FREObj
         
     }];
 
-    NSLog(@"Exiting LoadPhotoAtIndex()");
+    //NSLog(@"Exiting LoadPhotoAtIndex()");
     
     return NULL;
 }
@@ -195,7 +208,7 @@ FREObject LoadPhotoAtIndex(FREContext ctx, void* funcData, uint32_t argc, FREObj
 // params: type (thumbnail, fullScreen, fullResolution)
 FREObject GetCurrentPhotoDimensions(FREContext ctx, void* funcData, uint32_t argc, FREObject argv[]) {
     
-    NSLog(@"Entering GetCurrentPhotoDimensions()");
+    //NSLog(@"Entering GetCurrentPhotoDimensions()");
     FREObject data = NULL;
     UIImage *image;
     // getting the type
@@ -227,7 +240,7 @@ FREObject GetCurrentPhotoDimensions(FREContext ctx, void* funcData, uint32_t arg
     }
     
 
-    NSLog(@"Exiting GetCurrentPhotoDimensions() for type %@", typeString);
+    //NSLog(@"Exiting GetCurrentPhotoDimensions() for type %@", typeString);
     return data;
 }
 
@@ -247,7 +260,7 @@ FREObject GetThumbnailPhotoDimensions(FREContext ctx, void* funcData, uint32_t a
 // params: BitmapData, type (thumbnail, fullScreen, fullResolution)
 FREObject DrawPhotoToBitmapData(FREContext ctx, void* funcData, uint32_t argc, FREObject argv[]) {
     
-    NSLog(@"Entering DrawFullScreenPhotoToBitmapData()");
+    //NSLog(@"Entering DrawFullScreenPhotoToBitmapData()");
     // Get the AS3 BitmapData
     FREBitmapData bitmapData;
     FREAcquireBitmapData(argv[0], &bitmapData);
@@ -269,7 +282,7 @@ FREObject DrawPhotoToBitmapData(FREContext ctx, void* funcData, uint32_t argc, F
         }
     
         if (image) {
-            NSLog(@"Found image");
+            //NSLog(@"Found image");
         
             imageToBitmapData(image, bitmapData);
         
@@ -281,7 +294,7 @@ FREObject DrawPhotoToBitmapData(FREContext ctx, void* funcData, uint32_t argc, F
         }
     }
     
-    NSLog(@"Exiting DrawFullScreenPhotoToBitmapData()");
+    //NSLog(@"Exiting DrawFullScreenPhotoToBitmapData()");
     return NULL;
 }
 
@@ -290,14 +303,14 @@ FREObject DrawPhotoToBitmapData(FREContext ctx, void* funcData, uint32_t argc, F
 // https://github.com/freshplanet/ANE-ImagePicker/blob/master/ios/AirImagePicker/AirImagePicker.m
 FREObject GetJPEGRepresentationSizeAtIndex(FREContext ctx, void* funcData, uint32_t argc, FREObject argv[]) {
 
-    NSLog(@"Entering GetJPEGRepresentationSizeAtIndex()");
+    //NSLog(@"Entering GetJPEGRepresentationSizeAtIndex()");
     uint32_t index;
     FREObject indexObject = argv[0];
     FREGetObjectAsUint32(indexObject, &index);
     ALAsset *asset = [assets objectAtIndex:index];
     UIImage *image = [UIImage imageWithCGImage:[asset thumbnail]];
     
-    NSLog(@"Exiting GetJPEGRepresentationSizeAtIndex()");
+    //NSLog(@"Exiting GetJPEGRepresentationSizeAtIndex()");
     if (image) {
        
         NSData *jpegData = UIImageJPEGRepresentation(image, 1.0);
@@ -319,7 +332,7 @@ FREObject GetJPEGRepresentationSizeAtIndex(FREContext ctx, void* funcData, uint3
 // https://github.com/freshplanet/ANE-ImagePicker/blob/master/ios/AirImagePicker/AirImagePicker.m
 FREObject CopyThumbnailJPEGRepresentationAtIndexToByteArray(FREContext ctx, void* funcData, uint32_t argc, FREObject argv[]) {
     
-    NSLog(@"Entering CopyThumbnailJPEGRepresentationAtIndexToByteArray()");
+    //NSLog(@"Entering CopyThumbnailJPEGRepresentationAtIndexToByteArray()");
     uint32_t index;
     FREObject indexObject = argv[0];
     FREGetObjectAsUint32(indexObject, &index);
@@ -342,7 +355,7 @@ FREObject CopyThumbnailJPEGRepresentationAtIndexToByteArray(FREContext ctx, void
         }
     }
 
-    NSLog(@"Exiting CopyThumbnailJPEGRepresentationAtIndexToByteArray()");
+    //NSLog(@"Exiting CopyThumbnailJPEGRepresentationAtIndexToByteArray()");
     return nil;
 }
 
@@ -350,7 +363,7 @@ FREObject CopyThumbnailJPEGRepresentationAtIndexToByteArray(FREContext ctx, void
 // params: startIndex, length
 FREObject GetPhotoInfos(FREContext ctx, void* funcData, uint32_t argc, FREObject argv[]) {
 
-    NSLog(@"Entering GetPhotoInfos()");
+    //NSLog(@"Entering GetPhotoInfos()");
     uint32_t startIndex;
     FREObject startIndexObject = argv[0];
     FREGetObjectAsUint32(startIndexObject, &startIndex);
@@ -401,11 +414,11 @@ FREObject GetPhotoInfos(FREContext ctx, void* funcData, uint32_t argc, FREObject
         // and insert the data object into the array
         FRESetArrayElementAt(populatedArray, i, data);
         
-        NSLog(@"Found a date %@", date);
+        //NSLog(@"Found a date %@", date);
     }
     
     
-    NSLog(@"Exiting GetPhotoInfos()");
+    //NSLog(@"Exiting GetPhotoInfos()");
     return populatedArray;
 }
 
@@ -416,10 +429,8 @@ FREObject GetPhotoInfos(FREContext ctx, void* funcData, uint32_t argc, FREObject
 
 FREObject CountPhotos(FREContext ctx, void* funcData, uint32_t argc, FREObject argv[]) {
     
-    NSLog(@"Entering CountPhotos()");
-    
-    //ALAssetsLibrary *library = [[ALAssetsLibrary alloc] init];
-    
+    //NSLog(@"Entering CountPhotos()");
+        
     NSUInteger __block images = 0;
     
     [library enumerateGroupsWithTypes:ALAssetsGroupSavedPhotos usingBlock:^(ALAssetsGroup *group, BOOL *stop) {
@@ -438,19 +449,8 @@ FREObject CountPhotos(FREContext ctx, void* funcData, uint32_t argc, FREObject a
         
 
     ];
-    
-    
-    
-    
-    //int32_t myCount = 333;
-    
-    // Prepare for AS3
-    //FREObject count;
-    //FRENewObjectFromInt32(images, &count);
-    
-    NSLog(@"Exiting CountPhotos()");
-    //FREDispatchStatusEventAsync(g_ctx, (const uint8_t*)"removedTransactions", (const uint8_t*)[images Int32]);
-    
+        
+    //NSLog(@"Exiting CountPhotos()");
     return NULL;
 }
 
@@ -465,11 +465,11 @@ FREObject CountPhotos(FREContext ctx, void* funcData, uint32_t argc, FREObject a
 
 FREObject InitNativeCode(FREContext ctx, void* funcData, uint32_t argc, FREObject argv[]) {
     
-    NSLog(@"Entering InitNativeCode()");
+    //NSLog(@"Entering InitNativeCode()");
     
     // Nothing to do.
     
-    NSLog(@"Exiting InitNativeCode()");
+    //NSLog(@"Exiting InitNativeCode()");
     
     return NULL;
 }
@@ -480,9 +480,9 @@ FREObject InitNativeCode(FREContext ctx, void* funcData, uint32_t argc, FREObjec
 void CameraRollContextInitializer(void* extData, const uint8_t* ctxType, FREContext ctx,
 						uint32_t* numFunctionsToTest, const FRENamedFunction** functionsToSet) {
     
-    NSLog(@"Entering CameraRollContextInitializer()");
+    //NSLog(@"Entering CameraRollContextInitializer()");
     
-	*numFunctionsToTest = 12;
+	*numFunctionsToTest = 13;
     
 	FRENamedFunction* func = (FRENamedFunction*) malloc(sizeof(FRENamedFunction) * *numFunctionsToTest);
 	
@@ -529,11 +529,15 @@ void CameraRollContextInitializer(void* extData, const uint8_t* ctxType, FRECont
     func[10].name = (const uint8_t*) "drawPhotoToBitmapData";
 	func[10].functionData = NULL;
 	func[10].function = &DrawPhotoToBitmapData;
+    
+    func[11].name = (const uint8_t*) "loadPhotosForUrls";
+	func[11].functionData = NULL;
+	func[11].function = &LoadPhotosForUrls;
 	
 	//Just for consistency with Android
-	func[11].name = (const uint8_t*) "initNativeCode";
-	func[11].functionData = NULL;
-	func[11].function = &InitNativeCode;
+	func[12].name = (const uint8_t*) "initNativeCode";
+	func[12].functionData = NULL;
+	func[12].function = &InitNativeCode;   
     
 	*functionsToSet = func;
     
@@ -541,7 +545,7 @@ void CameraRollContextInitializer(void* extData, const uint8_t* ctxType, FRECont
     library = [[ALAssetsLibrary alloc] init];
     assets = [[NSMutableArray alloc] init];
     
-    NSLog(@"Exiting CameraRollContextInitializer()");
+    //NSLog(@"Exiting CameraRollContextInitializer()");
     
 }
 
@@ -553,13 +557,13 @@ void CameraRollContextInitializer(void* extData, const uint8_t* ctxType, FRECont
 
 void CameraRollContextFinalizer(FREContext ctx) {
     
-    NSLog(@"Entering CameraRollContextFinalizer()");
+    //NSLog(@"Entering CameraRollContextFinalizer()");
     
     library = NULL;
     assets = NULL;
     currentAsset = NULL;
     
-    NSLog(@"Exiting CameraRollContextFinalizer()");
+    //NSLog(@"Exiting CameraRollContextFinalizer()");
     
 	return;
 }
@@ -571,13 +575,13 @@ void CameraRollContextFinalizer(FREContext ctx) {
 void CameraRollExtensionInitializer(void** extDataToSet, FREContextInitializer* ctxInitializerToSet,
                     FREContextFinalizer* ctxFinalizerToSet) {
     
-    NSLog(@"Entering CameraRollExtensionInitializer()");
+    //NSLog(@"Entering CameraRollExtensionInitializer()");
     
     *extDataToSet = NULL;
     *ctxInitializerToSet = &CameraRollContextInitializer;
     *ctxFinalizerToSet = &CameraRollContextFinalizer;
     
-    NSLog(@"Exiting CameraRollExtensionInitializer()");
+    //NSLog(@"Exiting CameraRollExtensionInitializer()");
 }
 
 //
@@ -585,11 +589,11 @@ void CameraRollExtensionInitializer(void** extDataToSet, FREContextInitializer* 
 
 void CameraRollExtensionFinalizer(void* extData) {
     
-    NSLog(@"Entering CameraRollExtensionFinalizer()");
+    //NSLog(@"Entering CameraRollExtensionFinalizer()");
     
     // Nothing to clean up.
     
-    NSLog(@"Exiting CameraRollExtensionFinalizer()");
+    //NSLog(@"Exiting CameraRollExtensionFinalizer()");
     return;
 }
 
@@ -610,13 +614,13 @@ FREResult FRENewObjectFromDate(NSDate* date, FREObject* asDate )
 
 void imageToBitmapData(UIImage *image, FREBitmapData bitmapData)
 {
-    NSLog(@"Entering imageToBitmapData()");
+    //NSLog(@"Entering imageToBitmapData()");
     
     // Pull the raw pixels values out of the image data
     CGImageRef imageRef = [image CGImage];
     NSUInteger width = CGImageGetWidth(imageRef);
     NSUInteger height = CGImageGetHeight(imageRef);
-    NSLog(@"Width: %d  Height: %d", width, height);
+    //NSLog(@"Width: %d  Height: %d", width, height);
     CGColorSpaceRef colorSpace = CGColorSpaceCreateDeviceRGB();
     unsigned char *rawData = malloc(height * width * 4);
     NSUInteger bytesPerPixel = 4;
@@ -657,5 +661,42 @@ void imageToBitmapData(UIImage *image, FREBitmapData bitmapData)
     // Free the memory we allocated
     free(rawData);
     
-    NSLog(@"Exiting imageToBitmapData()");
+    //NSLog(@"Exiting imageToBitmapData()");
+}
+
+NSMutableArray* loadImagesForUrls(NSArray *imageUrls) {
+    
+    NSMutableArray *loadedImages = [[NSMutableArray alloc] init];
+    @try
+    {
+        for(int index = 0; index < [imageUrls count]; index++)
+        {
+            NSURL *url = [imageUrls objectAtIndex:index];
+            
+            [library assetForURL:url resultBlock:^(ALAsset *asset) {
+                                
+                dispatch_async(dispatch_get_main_queue(), ^{
+                    
+                    if (asset) {
+                        [loadedImages addObject:asset];
+                    }
+                    
+                });
+                
+            } failureBlock:^(NSError *error) {
+                
+                NSLog(@"Failed to get Image");
+            }];
+            
+        }
+    }
+    @catch (NSException *exception)
+    {
+        NSLog(@"%s\n exception: Name- %@ Reason->%@", __PRETTY_FUNCTION__,[exception name],[exception reason]);
+    }
+    @finally
+    {
+        NSLog(@"Finished loadImagesForUrls");
+        return loadedImages;
+    }
 }

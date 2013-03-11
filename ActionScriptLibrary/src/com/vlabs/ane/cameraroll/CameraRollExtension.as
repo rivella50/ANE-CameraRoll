@@ -14,6 +14,8 @@ package com.vlabs.ane.cameraroll
 		private static const LOAD_PHOTO_TYPE_FULL_SCREEN:String = "loadPhotoTypeFullScreen";
 		private static const LOAD_PHOTO_TYPE_FULL_RESOLUTION:String = "loadPhotoTypeFullResolution";
 		
+		private static const LOAD_PHOTO_TYPE_THUMBNAIL_FOR_DIMENSIONS:String = "loadPhotoTypeThumbnailForDimensions";
+		
 		private static const PHOTO_TYPE_THUMBNAIL:String = "thumbnail";
 		private static const PHOTO_TYPE_FULL_SCREEN:String = "fullScreen";
 		private static const PHOTO_TYPE_FULL_RESOLUTION:String = "fullResolution";
@@ -97,7 +99,7 @@ package com.vlabs.ane.cameraroll
 				var dimensions:PhotoDimensions = getCurrentPhotoDimensions(PHOTO_TYPE_THUMBNAIL);
 				bitmap = new BitmapData(dimensions.width, dimensions.height);
 				drawPhotoToBitmapData(bitmap, PHOTO_TYPE_THUMBNAIL);
-				var event:PhotoAppEvent = new PhotoAppEvent(PhotoAppEvent.EVENT_FULLSCREEN_IMAGE_LOADED);
+				var event:PhotoAppEvent = new PhotoAppEvent(PhotoAppEvent.EVENT_THUMBNAIL_IMAGE_LOADED);
 				event.data = bitmap;
 				dispatchEvent(event);
 				return;
@@ -107,7 +109,7 @@ package com.vlabs.ane.cameraroll
 				var dimensions:PhotoDimensions = getCurrentPhotoDimensions(PHOTO_TYPE_FULL_SCREEN);
 				bitmap = new BitmapData(dimensions.width, dimensions.height);
 				drawPhotoToBitmapData(bitmap, PHOTO_TYPE_FULL_SCREEN);
-				var event:PhotoAppEvent = new PhotoAppEvent(PhotoAppEvent.EVENT_FULLSCREEN_IMAGE_LOADED);
+				var event:PhotoAppEvent = new PhotoAppEvent(PhotoAppEvent.EVENT_FULL_SCREEN_IMAGE_LOADED);
 				event.data = bitmap;
 				dispatchEvent(event);
 				return;
@@ -117,8 +119,15 @@ package com.vlabs.ane.cameraroll
 				var dimensions:PhotoDimensions = getCurrentPhotoDimensions(PHOTO_TYPE_FULL_RESOLUTION);
 				bitmap = new BitmapData(dimensions.width, dimensions.height);
 				drawPhotoToBitmapData(bitmap, PHOTO_TYPE_FULL_RESOLUTION);
-				var event:PhotoAppEvent = new PhotoAppEvent(PhotoAppEvent.EVENT_FULLSCREEN_IMAGE_LOADED);
+				var event:PhotoAppEvent = new PhotoAppEvent(PhotoAppEvent.EVENT_FULL_RESOLUTION_IMAGE_LOADED);
 				event.data = bitmap;
+				dispatchEvent(event);
+				return;
+			} else if (e.code == LOAD_PHOTO_TYPE_THUMBNAIL_FOR_DIMENSIONS) {
+				
+				var dimensions:PhotoDimensions = getCurrentPhotoDimensions(PHOTO_TYPE_THUMBNAIL);
+				var event:PhotoAppEvent = new PhotoAppEvent(PhotoAppEvent.EVENT_DEFAULT_THUMBNAIL_DIMENSIONS_LOADED);
+				event.data = dimensions;
 				dispatchEvent(event);
 				return;
 			}
@@ -153,6 +162,15 @@ package com.vlabs.ane.cameraroll
 			_context.call("initNativeCode", null);
 		}
 		
+		/**
+		 * This is a 2-step call to context: First load the first thumbnail in CameraRoll and after returning get the
+		 * dimensions.
+		 */
+		public function determineThumbnailDefaultDimensions():void {
+			
+			loadThumbnailPhotoAtIndex(0, LOAD_PHOTO_TYPE_THUMBNAIL_FOR_DIMENSIONS);
+		}
+		
 		
 		public function countPhotos():void {
 			
@@ -169,34 +187,34 @@ package com.vlabs.ane.cameraroll
 			return _context.call("getPhotoInfos", startIndex, length) as Array;
 		}
 		
-		public function loadThumbnailPhotoForUrl(url:String):void {
+		public function loadThumbnailPhotoForUrl(url:String, type:String = LOAD_PHOTO_TYPE_THUMBNAIL):void {
 			
-			_context.call("loadPhotoForUrl", url, LOAD_PHOTO_TYPE_THUMBNAIL);
+			_context.call("loadPhotoForUrl", url, type);
 		}
 		
-		public function loadFullScreenPhotoForUrl(url:String):void {
+		public function loadFullScreenPhotoForUrl(url:String, type:String = LOAD_PHOTO_TYPE_FULL_SCREEN):void {
 			
-			_context.call("loadPhotoForUrl", url, LOAD_PHOTO_TYPE_FULL_SCREEN);
+			_context.call("loadPhotoForUrl", url, type);
 		}
 		
-		public function loadFullResolutionPhotoForUrl(url:String):void {
+		public function loadFullResolutionPhotoForUrl(url:String, type:String = LOAD_PHOTO_TYPE_FULL_RESOLUTION):void {
 			
-			_context.call("loadPhotoForUrl", url, LOAD_PHOTO_TYPE_FULL_RESOLUTION);
+			_context.call("loadPhotoForUrl", url, type);
 		}
 		
-		public function loadThumbnailPhotoAtIndex(index:int):void {
+		public function loadThumbnailPhotoAtIndex(index:int, type:String = LOAD_PHOTO_TYPE_THUMBNAIL):void {
 			
-			_context.call("loadPhotoAtIndex", index, LOAD_PHOTO_TYPE_THUMBNAIL);
+			_context.call("loadPhotoAtIndex", index, type);
 		}
 		
-		public function loadFullScreenPhotoAtIndex(index:int):void {
+		public function loadFullScreenPhotoAtIndex(index:int, type:String = LOAD_PHOTO_TYPE_FULL_SCREEN):void {
 			
-			_context.call("loadPhotoAtIndex", index, LOAD_PHOTO_TYPE_FULL_SCREEN);
+			_context.call("loadPhotoAtIndex", index, type);
 		}
 		
-		public function loadFullResolutionPhotoAtIndex(index:int):void {
+		public function loadFullResolutionPhotoAtIndex(index:int, type:String = LOAD_PHOTO_TYPE_FULL_RESOLUTION):void {
 			
-			_context.call("loadPhotoAtIndex", index, LOAD_PHOTO_TYPE_FULL_RESOLUTION);
+			_context.call("loadPhotoAtIndex", index, type);
 		}
 		
 		public function getCurrentPhotoDimensions(type:String = PHOTO_TYPE_THUMBNAIL):PhotoDimensions {
