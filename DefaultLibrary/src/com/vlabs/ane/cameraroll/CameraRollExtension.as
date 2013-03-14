@@ -9,10 +9,16 @@ package com.vlabs.ane.cameraroll
 		private static const LOAD_PHOTO_TYPE_THUMBNAILS_FOR_URLS:String = "loadPhotoTypeThumbnailsForUrls";
 		
 		private static const LOAD_PHOTO_TYPE_THUMBNAIL:String = "loadPhotoTypeThumbnail";
+		private static const LOAD_PHOTO_TYPE_ASPECT_RATIO_THUMBNAIL:String = "loadPhotoTypeAspectRatioThumbnail";
 		private static const LOAD_PHOTO_TYPE_FULL_SCREEN:String = "loadPhotoTypeFullScreen";
 		private static const LOAD_PHOTO_TYPE_FULL_RESOLUTION:String = "loadPhotoTypeFullResolution";
 		
 		private static const LOAD_PHOTO_TYPE_THUMBNAIL_FOR_DIMENSIONS:String = "loadPhotoTypeThumbnailForDimensions";
+		
+		private static const PHOTO_TYPE_THUMBNAIL:String = "thumbnail";
+		private static const PHOTO_TYPE_ASPECT_RATIO_THUMBNAIL:String = "aspectRatioThumbnail";
+		private static const PHOTO_TYPE_FULL_SCREEN:String = "fullScreen";
+		private static const PHOTO_TYPE_FULL_RESOLUTION:String = "fullResolution";
 		
 		private static var _instance:CameraRollExtension;
 				
@@ -86,6 +92,11 @@ package com.vlabs.ane.cameraroll
 		}
 		
 		public function getCurrentPhotoDimensions(type:String = "thumbnail"):PhotoDimensions {
+			
+			return null;
+		}
+		
+		private function getPhotoDimensionsAtIndex(type:String = PHOTO_TYPE_THUMBNAIL):PhotoDimensions {
 			
 			return null;
 		}

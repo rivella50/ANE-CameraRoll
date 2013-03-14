@@ -23,7 +23,7 @@ ALAssetsLibrary *library;
 
 // loads an amount of photo assets, depending on the given start index and the amount
 // async method
-// params: startIndex, amount
+// params: startIndex, amount, type
 FREObject LoadPhotoAssets(FREContext ctx, void* funcData, uint32_t argc, FREObject argv[]) {
     
     //NSLog(@"Entering LoadPhotoAssets()");
@@ -84,7 +84,7 @@ FREObject LoadPhotoAssets(FREContext ctx, void* funcData, uint32_t argc, FREObje
 }
 
 // WORKS: this is for BitmapData passed from as3
-// params: index, BitmapData
+// params: index, BitmapData, type (thumbnail, aspectRatioThumbnail)
 // https://github.com/freshplanet/ANE-ImagePicker/blob/master/ios/AirImagePicker/AirImagePicker.m
 FREObject DrawThumbnailAtIndexToBitmapData(FREContext ctx, void* funcData, uint32_t argc, FREObject argv[]) {
     
@@ -93,7 +93,20 @@ FREObject DrawThumbnailAtIndexToBitmapData(FREContext ctx, void* funcData, uint3
     FREObject indexObject = argv[0];
     FREGetObjectAsUint32(indexObject, &index);
     ALAsset *asset = [assets objectAtIndex:index];
-    UIImage *image = [UIImage imageWithCGImage:[asset thumbnail]];
+    
+    // getting the type
+    uint32_t typeLength;
+    const uint8_t *type;
+    FREGetObjectAsUTF8(argv[2], &typeLength, &type);
+    NSString *typeString = [NSString stringWithUTF8String:(char*)type];
+    
+    UIImage *image;
+    
+    if ([typeString isEqualToString:@"thumbnail"]) {
+        image = [UIImage imageWithCGImage:[asset thumbnail]];
+    } else if ([typeString isEqualToString:@"aspectRatioThumbnail"]) {
+        image = [UIImage imageWithCGImage:[asset aspectRatioThumbnail]];
+    }
     
     // Get the AS3 BitmapData
     FREBitmapData bitmapData;
@@ -224,7 +237,59 @@ FREObject LoadPhotoAtIndex(FREContext ctx, void* funcData, uint32_t argc, FREObj
 
 // gets the dimension for the current loaded photo
 // sync method
-// params: type (thumbnail, fullScreen, fullResolution)
+// params: index, type (thumbnail, aspectRatioThumbnail, fullScreen, fullResolution)
+FREObject GetPhotoDimensionsAtIndex(FREContext ctx, void* funcData, uint32_t argc, FREObject argv[]) {
+    
+    //NSLog(@"Entering GetCurrentPhotoDimensions()");
+    FREObject data = NULL;
+    UIImage *image;
+    
+    // getting the index
+    uint32_t index;
+    FREObject indexObject = argv[0];
+    FREGetObjectAsUint32(indexObject, &index);
+    
+    // getting the type
+    uint32_t typeLength;
+    const uint8_t *type;
+    FREGetObjectAsUTF8(argv[1], &typeLength, &type);
+    NSString *typeString = [NSString stringWithUTF8String:(char*)type];
+    
+    ALAsset *asset = [assets objectAtIndex:index];
+    
+    if (asset) {
+        if ([typeString isEqualToString:@"thumbnail"]) {
+            image = [UIImage imageWithCGImage:[asset thumbnail]];
+        } else if ([typeString isEqualToString:@"aspectRatioThumbnail"]) {
+            image = [UIImage imageWithCGImage:[asset aspectRatioThumbnail]];
+        } else if ([typeString isEqualToString:@"fullScreen"]) {
+            image = [UIImage imageWithCGImage:asset.defaultRepresentation.fullScreenImage];
+        } else if ([typeString isEqualToString:@"fullResolution"]) {
+            image = [UIImage imageWithCGImage:asset.defaultRepresentation.fullResolutionImage];
+        }
+        CGImageRef imageRef = [image CGImage];
+        NSUInteger width = CGImageGetWidth(imageRef);
+        NSUInteger height = CGImageGetHeight(imageRef);
+        
+        FREObject widthObject = nil;
+        FRENewObjectFromInt32(width, &widthObject);
+        FREObject heightObject = nil;
+        FRENewObjectFromInt32(height, &heightObject);
+        
+        FRENewObject((const uint8_t*)"com.vlabs.ane.cameraroll.PhotoDimensions", 0, NULL, &data, NULL);
+        FRESetObjectProperty(data, (const uint8_t*)"width", widthObject, NULL);
+        FRESetObjectProperty(data, (const uint8_t*)"height", heightObject, NULL);
+    }
+    
+    
+    //NSLog(@"Exiting GetCurrentPhotoDimensions() for type %@", typeString);
+    return data;
+}
+
+
+// gets the dimension for the current loaded photo
+// sync method
+// params: type (thumbnail, aspectRatioThumbnail, fullScreen, fullResolution)
 FREObject GetCurrentPhotoDimensions(FREContext ctx, void* funcData, uint32_t argc, FREObject argv[]) {
     
     //NSLog(@"Entering GetCurrentPhotoDimensions()");
@@ -239,6 +304,8 @@ FREObject GetCurrentPhotoDimensions(FREContext ctx, void* funcData, uint32_t arg
     if (currentAsset) {
         if ([typeString isEqualToString:@"thumbnail"]) {
             image = [UIImage imageWithCGImage:[currentAsset thumbnail]];
+        } else if ([typeString isEqualToString:@"aspectRatioThumbnail"]) {
+            image = [UIImage imageWithCGImage:[currentAsset aspectRatioThumbnail]];
         } else if ([typeString isEqualToString:@"fullScreen"]) {
             image = [UIImage imageWithCGImage:currentAsset.defaultRepresentation.fullScreenImage];
         } else if ([typeString isEqualToString:@"fullResolution"]) {
@@ -501,7 +568,7 @@ void CameraRollContextInitializer(void* extData, const uint8_t* ctxType, FRECont
     
     //NSLog(@"Entering CameraRollContextInitializer()");
     
-	*numFunctionsToTest = 13;
+	*numFunctionsToTest = 14;
     
 	FRENamedFunction* func = (FRENamedFunction*) malloc(sizeof(FRENamedFunction) * *numFunctionsToTest);
 	
@@ -551,12 +618,16 @@ void CameraRollContextInitializer(void* extData, const uint8_t* ctxType, FRECont
     
     func[11].name = (const uint8_t*) "loadPhotoAssetsForUrls";
 	func[11].functionData = NULL;
-	func[11].function = &LoadPhotoAssetsForUrls;
+	func[11].function = &LoadPhotoAssetsForUrls;     
 	
-	//Just for consistency with Android
-	func[12].name = (const uint8_t*) "initNativeCode";
+    func[12].name = (const uint8_t*) "getPhotoDimensionsAtIndex";
 	func[12].functionData = NULL;
-	func[12].function = &InitNativeCode;   
+	func[12].function = &GetPhotoDimensionsAtIndex;
+    
+	//Just for consistency with Android
+	func[13].name = (const uint8_t*) "initNativeCode";
+	func[13].functionData = NULL;
+	func[13].function = &InitNativeCode;   
     
 	*functionsToSet = func;
     

@@ -10,16 +10,20 @@ package com.vlabs.ane.cameraroll
 	[Event(name=PhotoAppEvent.type, type="com.vlabs.ane.cameraroll.PhotoAppEvent")]
 	public class CameraRollExtension extends EventDispatcher
 	{
-		private static const LOAD_PHOTO_TYPE_THUMBNAILS:String = "loadPhotoTypeThumbnails";
-		private static const LOAD_PHOTO_TYPE_THUMBNAILS_FOR_URLS:String = "loadPhotoTypeThumbnailsForUrls";
+		public static const LOAD_PHOTO_TYPE_THUMBNAILS:String = "loadPhotoTypeThumbnails";
+		public static const LOAD_PHOTO_TYPE_ASPECT_RATIO_THUMBNAILS:String = "loadPhotoTypeAspectRatioThumbnails";
+		public static const LOAD_PHOTO_TYPE_THUMBNAILS_FOR_URLS:String = "loadPhotoTypeThumbnailsForUrls";
+		public static const LOAD_PHOTO_TYPE_ASPECT_RATIO_THUMBNAILS_FOR_URLS:String = "loadPhotoTypeAspectRatioThumbnailsForUrls";
 		
-		private static const LOAD_PHOTO_TYPE_THUMBNAIL:String = "loadPhotoTypeThumbnail";
-		private static const LOAD_PHOTO_TYPE_FULL_SCREEN:String = "loadPhotoTypeFullScreen";
-		private static const LOAD_PHOTO_TYPE_FULL_RESOLUTION:String = "loadPhotoTypeFullResolution";
+		public static const LOAD_PHOTO_TYPE_THUMBNAIL:String = "loadPhotoTypeThumbnail";
+		public static const LOAD_PHOTO_TYPE_ASPECT_RATIO_THUMBNAIL:String = "loadPhotoTypeAspectRatioThumbnail";
+		public static const LOAD_PHOTO_TYPE_FULL_SCREEN:String = "loadPhotoTypeFullScreen";
+		public static const LOAD_PHOTO_TYPE_FULL_RESOLUTION:String = "loadPhotoTypeFullResolution";
 		
 		private static const LOAD_PHOTO_TYPE_THUMBNAIL_FOR_DIMENSIONS:String = "loadPhotoTypeThumbnailForDimensions";
 		
 		private static const PHOTO_TYPE_THUMBNAIL:String = "thumbnail";
+		private static const PHOTO_TYPE_ASPECT_RATIO_THUMBNAIL:String = "aspectRatioThumbnail";
 		private static const PHOTO_TYPE_FULL_SCREEN:String = "fullScreen";
 		private static const PHOTO_TYPE_FULL_RESOLUTION:String = "fullResolution";
 		
@@ -30,6 +34,7 @@ package com.vlabs.ane.cameraroll
 		// since thumbnails all have the same dimensions we store it in context after first retrieval
 		private var _thumbnailWidth:int;
 		private var _thumbnailHeight:int;
+		private var _photoType:String;
 		
 		public function CameraRollExtension()
 		{
@@ -53,13 +58,14 @@ package com.vlabs.ane.cameraroll
 				trace("received status event for count photos request ", e.level);
 				dispatchEvent(event);
 				
-			} else if (e.code === LOAD_PHOTO_TYPE_THUMBNAILS) {
+			} else if (e.code == LOAD_PHOTO_TYPE_THUMBNAILS || e.code == LOAD_PHOTO_TYPE_ASPECT_RATIO_THUMBNAILS) {
 				
 				var bitmap:BitmapData;
 				var byteArray:ByteArray;
 				var amount:int = int(e.level);
 				var object:PhotoObject;
 				var infos:Array;
+				var dimensions:PhotoDimensions;
 				if (amount > 0) {
 					
 					infos = getPhotoInfos(0, amount);
@@ -71,8 +77,10 @@ package com.vlabs.ane.cameraroll
 						
 						// https://github.com/freshplanet/ANE-ImagePicker/blob/master/actionscript/src/com/freshplanet/ane/AirImagePicker/AirImagePicker.as
 						// 1st possibility: draw into a BitmapData
-						bitmap = new BitmapData(_thumbnailWidth, _thumbnailHeight);
-						_context.call("drawThumbnailAtIndexToBitmapData", i, bitmap);
+						dimensions = getPhotoDimensionsAtIndex(i, _photoType);
+						bitmap = new BitmapData(dimensions.width, dimensions.height);
+						//trace("bitmap: ", bitmap.width,"/", bitmap.height);
+						_context.call("drawThumbnailAtIndexToBitmapData", i, bitmap, _photoType);
 						object.thumbnail = bitmap;
 						object.metadata = infos[i];
 						array.push(object);
@@ -97,13 +105,14 @@ package com.vlabs.ane.cameraroll
 				}
 				
 				
-			} else if (e.code === LOAD_PHOTO_TYPE_THUMBNAILS_FOR_URLS) {
+			} else if (e.code == LOAD_PHOTO_TYPE_THUMBNAILS_FOR_URLS || e.code == LOAD_PHOTO_TYPE_ASPECT_RATIO_THUMBNAILS_FOR_URLS) {
 			
 				var bitmap:BitmapData;
 				var byteArray:ByteArray;
 				var amount:int = int(e.level);
 				var object:PhotoObject;
 				var infos:Array;
+				var dimensions:PhotoDimensions;
 				if (amount > 0) {
 					
 					infos = getPhotoInfos(0, amount);
@@ -115,8 +124,9 @@ package com.vlabs.ane.cameraroll
 						
 						// https://github.com/freshplanet/ANE-ImagePicker/blob/master/actionscript/src/com/freshplanet/ane/AirImagePicker/AirImagePicker.as
 						// 1st possibility: draw into a BitmapData
-						bitmap = new BitmapData(_thumbnailWidth, _thumbnailHeight);
-						_context.call("drawThumbnailAtIndexToBitmapData", i, bitmap);
+						dimensions = getPhotoDimensionsAtIndex(i, _photoType);
+						bitmap = new BitmapData(dimensions.width, dimensions.height);
+						_context.call("drawThumbnailAtIndexToBitmapData", i, bitmap, _photoType);
 						object.thumbnail = bitmap;
 						object.metadata = infos[i];
 						array.push(object);
@@ -219,15 +229,25 @@ package com.vlabs.ane.cameraroll
 		
 		public function loadThumbnailPhotoAssets(startIndex:int, amount:int, thumbnailWidth:int, thumbnailHeight:int, type:String = LOAD_PHOTO_TYPE_THUMBNAILS):void {
 			
-			_thumbnailWidth = thumbnailWidth;
-			_thumbnailHeight = thumbnailHeight;
+			//_thumbnailWidth = thumbnailWidth;
+			//_thumbnailHeight = thumbnailHeight;
+			if (type == LOAD_PHOTO_TYPE_THUMBNAILS)
+				_photoType = PHOTO_TYPE_THUMBNAIL;
+			else if (type == LOAD_PHOTO_TYPE_ASPECT_RATIO_THUMBNAILS)
+				_photoType = PHOTO_TYPE_ASPECT_RATIO_THUMBNAIL;
+			
 			_context.call("loadPhotoAssets", startIndex, amount, type);
 		}
 		
 		public function loadThumbnailPhotoAssetsForUrls(urls:Array, thumbnailWidth:int, thumbnailHeight:int, type:String = LOAD_PHOTO_TYPE_THUMBNAILS_FOR_URLS):void {
 			
-			_thumbnailWidth = thumbnailWidth;
-			_thumbnailHeight = thumbnailHeight;
+			//_thumbnailWidth = thumbnailWidth;
+			//_thumbnailHeight = thumbnailHeight;
+			if (type == LOAD_PHOTO_TYPE_THUMBNAILS_FOR_URLS)
+				_photoType = PHOTO_TYPE_THUMBNAIL;
+			else if (type == LOAD_PHOTO_TYPE_ASPECT_RATIO_THUMBNAILS_FOR_URLS)
+				_photoType = PHOTO_TYPE_ASPECT_RATIO_THUMBNAIL;
+			
 			_context.call("loadPhotoAssetsForUrls", urls, type);
 		}
 		
@@ -269,6 +289,11 @@ package com.vlabs.ane.cameraroll
 		public function getCurrentPhotoDimensions(type:String = PHOTO_TYPE_THUMBNAIL):PhotoDimensions {
 			
 			return _context.call("getCurrentPhotoDimensions", type) as PhotoDimensions;
+		}
+		
+		private function getPhotoDimensionsAtIndex(index:int, type:String = PHOTO_TYPE_THUMBNAIL):PhotoDimensions {
+			
+			return _context.call("getPhotoDimensionsAtIndex", index, type) as PhotoDimensions;
 		}
 		
 		private function drawPhotoToBitmapData(bitmapData:BitmapData, type:String):void {
