@@ -71,7 +71,7 @@ package com.vlabs.ane.cameraroll
 						
 						// https://github.com/freshplanet/ANE-ImagePicker/blob/master/actionscript/src/com/freshplanet/ane/AirImagePicker/AirImagePicker.as
 						// 1st possibility: draw into a BitmapData
-						bitmap = new BitmapData(150, 150);
+						bitmap = new BitmapData(_thumbnailWidth, _thumbnailHeight);
 						_context.call("drawThumbnailAtIndexToBitmapData", i, bitmap);
 						object.thumbnail = bitmap;
 						object.metadata = infos[i];
@@ -115,7 +115,7 @@ package com.vlabs.ane.cameraroll
 						
 						// https://github.com/freshplanet/ANE-ImagePicker/blob/master/actionscript/src/com/freshplanet/ane/AirImagePicker/AirImagePicker.as
 						// 1st possibility: draw into a BitmapData
-						bitmap = new BitmapData(150, 150);
+						bitmap = new BitmapData(_thumbnailWidth, _thumbnailHeight);
 						_context.call("drawThumbnailAtIndexToBitmapData", i, bitmap);
 						object.thumbnail = bitmap;
 						object.metadata = infos[i];
@@ -182,13 +182,6 @@ package com.vlabs.ane.cameraroll
 			
 		}
 		
-		/**
-		 * 
-		 */
-		private function assertThumbnailPhotoDimensions():void {
-			
-			
-		}
 		
 		public static function getInstance() : CameraRollExtension
 		{
@@ -224,14 +217,18 @@ package com.vlabs.ane.cameraroll
 			_context.call("countPhotos", null);
 		}
 		
-		public function loadPhotoAssets(startIndex:int, amount:int):void {
+		public function loadThumbnailPhotoAssets(startIndex:int, amount:int, thumbnailWidth:int, thumbnailHeight:int, type:String = LOAD_PHOTO_TYPE_THUMBNAILS):void {
 			
-			_context.call("loadPhotoAssets", startIndex, amount);
+			_thumbnailWidth = thumbnailWidth;
+			_thumbnailHeight = thumbnailHeight;
+			_context.call("loadPhotoAssets", startIndex, amount, type);
 		}
 		
-		public function loadPhotosForUrls(urls:Array):void {
+		public function loadThumbnailPhotoAssetsForUrls(urls:Array, thumbnailWidth:int, thumbnailHeight:int, type:String = LOAD_PHOTO_TYPE_THUMBNAILS_FOR_URLS):void {
 			
-			_context.call("loadPhotosForUrls", urls);
+			_thumbnailWidth = thumbnailWidth;
+			_thumbnailHeight = thumbnailHeight;
+			_context.call("loadPhotoAssetsForUrls", urls, type);
 		}
 		
 		public function getPhotoInfos(startIndex:int, length:int):Array {

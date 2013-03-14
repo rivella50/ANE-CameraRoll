@@ -40,13 +40,19 @@ FREObject LoadPhotoAssets(FREContext ctx, void* funcData, uint32_t argc, FREObje
     FREObject amountObject = argv[1];
     FREGetObjectAsUint32(amountObject, &amount);
     
+    // finally the notify string
+    uint32_t notifyLength;
+    const uint8_t *notify;
+    FREGetObjectAsUTF8(argv[2], &notifyLength, &notify);
+    NSString *notifyString = [NSString stringWithUTF8String:(char*)notify];
+    
     [library enumerateGroupsWithTypes:ALAssetsGroupSavedPhotos usingBlock:^(ALAssetsGroup *group, BOOL *stop) {
         
         if (group == nil) {
             NSInteger numberOfPhotos = [assets count];
                     
             NSString *result = [NSString stringWithFormat:@"%d",(int)numberOfPhotos];
-            FREDispatchStatusEventAsync(g_ctx, (const uint8_t*)"loadPhotoTypeThumbnails", (uint8_t*)[result UTF8String]);
+            FREDispatchStatusEventAsync(g_ctx, (const uint8_t*)[notifyString UTF8String], (uint8_t*)[result UTF8String]);
         } else {
             [group setAssetsFilter:[ALAssetsFilter allPhotos]];
             NSInteger totalCount = [group numberOfAssets];
@@ -150,7 +156,7 @@ FREObject LoadPhotoForUrl(FREContext ctx, void* funcData, uint32_t argc, FREObje
 // see: http://stackoverflow.com/questions/15328101/how-to-load-several-photos-with-assetforurl-with-a-list-of-urls
 // async
 // params: list of asset urls
-FREObject LoadPhotosForUrls(FREContext ctx, void* funcData, uint32_t argc, FREObject argv[]) {
+FREObject LoadPhotoAssetsForUrls(FREContext ctx, void* funcData, uint32_t argc, FREObject argv[]) {
     
     NSLog(@"Entering LoadPhotosForUrls()");
     
@@ -161,16 +167,13 @@ FREObject LoadPhotosForUrls(FREContext ctx, void* funcData, uint32_t argc, FREOb
     uint32_t arr_len;
     FREGetArrayLength(arr, &arr_len);
     
-    // notify string
-    FREObject result;
-    const char *resultString = "loadPhotoTypeThumbnailsForUrls";
-    FRENewObjectFromUTF8(strlen(resultString)+1, (const uint8_t *) resultString, &result);
-    NSString *notifyString = @"loadPhotoTypeThumbnailsForUrls";
+    // finally the notify string
+    uint32_t notifyLength;
+    const uint8_t *notify;
+    FREGetObjectAsUTF8(argv[1], &notifyLength, &notify);
+    NSString *notifyString = [NSString stringWithUTF8String:(char*)notify];
     
     loadImagesForUrls(arr, assets, notifyString);
-    //NSInteger numberOfPhotos = [assets count];
-    //NSString *result = [NSString stringWithFormat:@"%d",(int)numberOfPhotos];
-    //FREDispatchStatusEventAsync(g_ctx, (const uint8_t*)"loadPhotoTypeThumbnailsForUrls", (uint8_t*)[result UTF8String]);
     
     //NSLog(@"Exiting LoadPhotosForUrls() with %d loaded assets", numberOfPhotos);
     return NULL;
@@ -546,9 +549,9 @@ void CameraRollContextInitializer(void* extData, const uint8_t* ctxType, FRECont
 	func[10].functionData = NULL;
 	func[10].function = &DrawPhotoToBitmapData;
     
-    func[11].name = (const uint8_t*) "loadPhotosForUrls";
+    func[11].name = (const uint8_t*) "loadPhotoAssetsForUrls";
 	func[11].functionData = NULL;
-	func[11].function = &LoadPhotosForUrls;
+	func[11].function = &LoadPhotoAssetsForUrls;
 	
 	//Just for consistency with Android
 	func[12].name = (const uint8_t*) "initNativeCode";
@@ -707,6 +710,8 @@ void loadImagesForUrls(FREObject imageUrls, NSMutableArray *loadedImages, NSStri
                     if (asset) {
                         NSLog(@"Adding asset to assets list.");
                         [loadedImages addObject:asset];
+                    } else {
+                        NSLog(@"Not found asset for url %@.", assetUrl);
                     }
                     
                     if (index == (arr_len - 1)) {

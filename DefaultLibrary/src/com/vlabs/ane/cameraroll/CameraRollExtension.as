@@ -48,11 +48,11 @@ package com.vlabs.ane.cameraroll
 			
 		}
 		
-		public function loadPhotoAssets():void {
+		public function loadThumbnailPhotoAssets(startIndex:int, amount:int, thumbnailWidth:int, thumbnailHeight:int, type:String = LOAD_PHOTO_TYPE_THUMBNAILS):void {
 			
 		}
 		
-		public function loadPhotosForUrls(urls:Array):void {
+		public function loadThumbnailPhotoAssetsForUrls(urls:Array, thumbnailWidth:int, thumbnailHeight:int, type:String = LOAD_PHOTO_TYPE_THUMBNAILS_FOR_URLS):void {
 			
 		}
 		
