@@ -227,10 +227,8 @@ package com.vlabs.ane.cameraroll
 			_context.call("countPhotos", null);
 		}
 		
-		public function loadThumbnailPhotoAssets(startIndex:int, amount:int, thumbnailWidth:int, thumbnailHeight:int, type:String = LOAD_PHOTO_TYPE_THUMBNAILS):void {
+		public function loadThumbnailPhotoAssets(startIndex:int, amount:int, type:String = LOAD_PHOTO_TYPE_THUMBNAILS):void {
 			
-			//_thumbnailWidth = thumbnailWidth;
-			//_thumbnailHeight = thumbnailHeight;
 			if (type == LOAD_PHOTO_TYPE_THUMBNAILS)
 				_photoType = PHOTO_TYPE_THUMBNAIL;
 			else if (type == LOAD_PHOTO_TYPE_ASPECT_RATIO_THUMBNAILS)
@@ -239,10 +237,8 @@ package com.vlabs.ane.cameraroll
 			_context.call("loadPhotoAssets", startIndex, amount, type);
 		}
 		
-		public function loadThumbnailPhotoAssetsForUrls(urls:Array, thumbnailWidth:int, thumbnailHeight:int, type:String = LOAD_PHOTO_TYPE_THUMBNAILS_FOR_URLS):void {
+		public function loadThumbnailPhotoAssetsForUrls(urls:Array, type:String = LOAD_PHOTO_TYPE_THUMBNAILS_FOR_URLS):void {
 			
-			//_thumbnailWidth = thumbnailWidth;
-			//_thumbnailHeight = thumbnailHeight;
 			if (type == LOAD_PHOTO_TYPE_THUMBNAILS_FOR_URLS)
 				_photoType = PHOTO_TYPE_THUMBNAIL;
 			else if (type == LOAD_PHOTO_TYPE_ASPECT_RATIO_THUMBNAILS_FOR_URLS)
