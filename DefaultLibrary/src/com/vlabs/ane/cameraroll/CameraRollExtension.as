@@ -20,9 +20,10 @@ package com.vlabs.ane.cameraroll
 		private static const PHOTO_TYPE_FULL_SCREEN:String = "fullScreen";
 		private static const PHOTO_TYPE_FULL_RESOLUTION:String = "fullResolution";
 		
+		private static const COUNT_PHOTOS_COMPLETED:String = "countPhotosCompleted";
+		
 		private static var _instance:CameraRollExtension;
 				
-		private var _array:Array;
 		
 		public function CameraRollExtension()
 		{
@@ -47,19 +48,34 @@ package com.vlabs.ane.cameraroll
 		}
 		
 		public function determineThumbnailDefaultDimensions():void {
-			
+		
+			var dimensions:PhotoDimensions = new PhotoDimensions();
+			dimensions.width = 150;
+			dimensions.height = 150;
+			var event:PhotoAppEvent = new PhotoAppEvent(PhotoAppEvent.EVENT_DEFAULT_THUMBNAIL_DIMENSIONS_LOADED);
+			event.data = dimensions;
+			dispatchEvent(event);
 		}
 		
 		public function countPhotos():void {
 			
+			var event:PhotoAppEvent = new PhotoAppEvent(PhotoAppEvent.EVENT_COUNT_PHOTOS);
+			event.data = "0";
+			dispatchEvent(event);
 		}
 		
-		public function loadThumbnailPhotoAssets(startIndex:int, amount:int, thumbnailWidth:int, thumbnailHeight:int, type:String = LOAD_PHOTO_TYPE_THUMBNAILS):void {
+		public function loadThumbnailPhotoAssets(startIndex:int, amount:int, type:String = LOAD_PHOTO_TYPE_THUMBNAILS):void {
 			
+			var event:PhotoAppEvent = new PhotoAppEvent(PhotoAppEvent.EVENT_THUMBS_LOADED);
+			event.data = [];
+			dispatchEvent(event);
 		}
 		
-		public function loadThumbnailPhotoAssetsForUrls(urls:Array, thumbnailWidth:int, thumbnailHeight:int, type:String = LOAD_PHOTO_TYPE_THUMBNAILS_FOR_URLS):void {
+		public function loadThumbnailPhotoAssetsForUrls(urls:Array, type:String = LOAD_PHOTO_TYPE_THUMBNAILS_FOR_URLS):void {
 			
+			var event:PhotoAppEvent = new PhotoAppEvent(PhotoAppEvent.EVENT_THUMBS_FOR_URLS_LOADED);
+			event.data = [];
+			dispatchEvent(event);
 		}
 		
 		public function getPhotoInfos(startIndex:int, length:int):Array {
@@ -93,12 +109,20 @@ package com.vlabs.ane.cameraroll
 		
 		public function getCurrentPhotoDimensions(type:String = "thumbnail"):PhotoDimensions {
 			
-			return null;
+			var dimensions:PhotoDimensions = new PhotoDimensions();
+			dimensions.width = 150;
+			dimensions.height = 150;
+			
+			return dimensions;
 		}
 		
 		private function getPhotoDimensionsAtIndex(type:String = PHOTO_TYPE_THUMBNAIL):PhotoDimensions {
 			
-			return null;
+			var dimensions:PhotoDimensions = new PhotoDimensions();
+			dimensions.width = 150;
+			dimensions.height = 150;
+			
+			return dimensions;
 		}
 		
 		private function drawPhotoToBitmapData(bitmapData:BitmapData, type:String):void {

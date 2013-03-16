@@ -27,6 +27,8 @@ package com.vlabs.ane.cameraroll
 		private static const PHOTO_TYPE_FULL_SCREEN:String = "fullScreen";
 		private static const PHOTO_TYPE_FULL_RESOLUTION:String = "fullResolution";
 		
+		private static const COUNT_PHOTOS_COMPLETED:String = "countPhotosCompleted";
+		
 		private static var _instance:CameraRollExtension;
 		
 		private var _context:ExtensionContext;
@@ -50,12 +52,12 @@ package com.vlabs.ane.cameraroll
 		
 		protected function onStatusHandler(e:StatusEvent):void
 		{	
-			trace("status code is: ", e.code);
-			if (e.code == "COUNT_PHOTOS_COMPLETED")	{
+			//trace("status code is: ", e.code);
+			if (e.code == COUNT_PHOTOS_COMPLETED)	{
 				
 				var event:PhotoAppEvent = new PhotoAppEvent(PhotoAppEvent.EVENT_COUNT_PHOTOS);
 				event.data = e.level;
-				trace("received status event for count photos request ", e.level);
+				//trace("received status event for count photos request ", e.level);
 				dispatchEvent(event);
 				
 			} else if (e.code == LOAD_PHOTO_TYPE_THUMBNAILS || e.code == LOAD_PHOTO_TYPE_ASPECT_RATIO_THUMBNAILS) {
@@ -66,11 +68,12 @@ package com.vlabs.ane.cameraroll
 				var object:PhotoObject;
 				var infos:Array;
 				var dimensions:PhotoDimensions;
+				var array:Array = [];
+				
 				if (amount > 0) {
 					
 					infos = getPhotoInfos(0, amount);
 					
-					var array:Array = [];
 					for (var i:int = 0; i < amount; i++) {
 						
 						object = new PhotoObject();
@@ -102,6 +105,10 @@ package com.vlabs.ane.cameraroll
 				} else {
 					
 					trace("there are no photos found in CameraRoll...");
+					var event:PhotoAppEvent = new PhotoAppEvent(PhotoAppEvent.EVENT_THUMBS_LOADED);
+					event.data = array;
+					dispatchEvent(event);
+					return;
 				}
 				
 				
@@ -113,11 +120,12 @@ package com.vlabs.ane.cameraroll
 				var object:PhotoObject;
 				var infos:Array;
 				var dimensions:PhotoDimensions;
+				var array:Array = [];
+				
 				if (amount > 0) {
 					
 					infos = getPhotoInfos(0, amount);
 					
-					var array:Array = [];
 					for (var i:int = 0; i < amount; i++) {
 						
 						object = new PhotoObject();
@@ -148,6 +156,9 @@ package com.vlabs.ane.cameraroll
 				} else {
 					
 					trace("there are no photos for urls found in CameraRoll...");
+					var event:PhotoAppEvent = new PhotoAppEvent(PhotoAppEvent.EVENT_THUMBS_FOR_URLS_LOADED);
+					event.data = array;
+					dispatchEvent(event);
 				}
 				
 			} else if (e.code == LOAD_PHOTO_TYPE_THUMBNAIL) {
@@ -221,12 +232,17 @@ package com.vlabs.ane.cameraroll
 			loadThumbnailPhotoAtIndex(0, LOAD_PHOTO_TYPE_THUMBNAIL_FOR_DIMENSIONS);
 		}
 		
-		
+		/**
+		 * Async counts the numer of photos in CameraRoll. Dispatches an event of type 
+		 */
 		public function countPhotos():void {
 			
 			_context.call("countPhotos", null);
 		}
 		
+		/**
+		 * Async loads a number of photo assets with offset startIndex of either type thumbnail or aspectRatioThumbnail
+		 */
 		public function loadThumbnailPhotoAssets(startIndex:int, amount:int, type:String = LOAD_PHOTO_TYPE_THUMBNAILS):void {
 			
 			if (type == LOAD_PHOTO_TYPE_THUMBNAILS)
@@ -237,6 +253,9 @@ package com.vlabs.ane.cameraroll
 			_context.call("loadPhotoAssets", startIndex, amount, type);
 		}
 		
+		/**
+		 * Async loads a number of photo assets for the passed list of url's of either type thumbnail or aspectRatioThumbnail
+		 */
 		public function loadThumbnailPhotoAssetsForUrls(urls:Array, type:String = LOAD_PHOTO_TYPE_THUMBNAILS_FOR_URLS):void {
 			
 			if (type == LOAD_PHOTO_TYPE_THUMBNAILS_FOR_URLS)
@@ -247,51 +266,82 @@ package com.vlabs.ane.cameraroll
 			_context.call("loadPhotoAssetsForUrls", urls, type);
 		}
 		
+		/**
+		 * Sync loads metadata for loaded photo assets.
+		 * Be careful: This call doesn't load photo assets, therefore you have to load the before that call!
+		 */
 		public function getPhotoInfos(startIndex:int, length:int):Array {
 			
 			return _context.call("getPhotoInfos", startIndex, length) as Array;
 		}
 		
+		/**
+		 * Async loads one photo asset for the given url and the type thumbnail.
+		 */
 		public function loadThumbnailPhotoForUrl(url:String, type:String = LOAD_PHOTO_TYPE_THUMBNAIL):void {
 			
 			_context.call("loadPhotoForUrl", url, type);
 		}
 		
+		/**
+		 * Async loads one photo asset for the given url and the type fullscreen.
+		 */
 		public function loadFullScreenPhotoForUrl(url:String, type:String = LOAD_PHOTO_TYPE_FULL_SCREEN):void {
 			
 			_context.call("loadPhotoForUrl", url, type);
 		}
 		
+		/**
+		 * Async loads one photo asset for the given url and the type fullresolution.
+		 */
 		public function loadFullResolutionPhotoForUrl(url:String, type:String = LOAD_PHOTO_TYPE_FULL_RESOLUTION):void {
 			
 			_context.call("loadPhotoForUrl", url, type);
 		}
 		
+		/**
+		 * Async loads one photo asset from CameraRoll for the given url and the type thumbnail.
+		 */
 		public function loadThumbnailPhotoAtIndex(index:int, type:String = LOAD_PHOTO_TYPE_THUMBNAIL):void {
 			
 			_context.call("loadPhotoAtIndex", index, type);
 		}
 		
+		/**
+		 * Async loads one photo asset from CameraRoll for the given url and the type fullscreen.
+		 */
 		public function loadFullScreenPhotoAtIndex(index:int, type:String = LOAD_PHOTO_TYPE_FULL_SCREEN):void {
 			
 			_context.call("loadPhotoAtIndex", index, type);
 		}
 		
+		/**
+		 * Async loads one photo asset from CameraRoll for the given url and the type fullresolution.
+		 */
 		public function loadFullResolutionPhotoAtIndex(index:int, type:String = LOAD_PHOTO_TYPE_FULL_RESOLUTION):void {
 			
 			_context.call("loadPhotoAtIndex", index, type);
 		}
 		
+		/**
+		 * Sync gets the dimensions for the currently loaded single photo asset of type thumbnail
+		 */
 		public function getCurrentPhotoDimensions(type:String = PHOTO_TYPE_THUMBNAIL):PhotoDimensions {
 			
 			return _context.call("getCurrentPhotoDimensions", type) as PhotoDimensions;
 		}
 		
+		/**
+		 * Sync gets the dimensions for the photo asset loaded previously at the given index
+		 */
 		private function getPhotoDimensionsAtIndex(index:int, type:String = PHOTO_TYPE_THUMBNAIL):PhotoDimensions {
 			
 			return _context.call("getPhotoDimensionsAtIndex", index, type) as PhotoDimensions;
 		}
 		
+		/**
+		 * Sync draws the current loaded asset into the passed BitmapData for the given type
+		 */
 		private function drawPhotoToBitmapData(bitmapData:BitmapData, type:String):void {
 			
 			_context.call("drawPhotoToBitmapData", bitmapData, type);

@@ -235,7 +235,7 @@ FREObject LoadPhotoAtIndex(FREContext ctx, void* funcData, uint32_t argc, FREObj
     return NULL;
 }
 
-// gets the dimension for the current loaded photo
+// gets the dimension for the loaded photo asset at the given index
 // sync method
 // params: index, type (thumbnail, aspectRatioThumbnail, fullScreen, fullResolution)
 FREObject GetPhotoDimensionsAtIndex(FREContext ctx, void* funcData, uint32_t argc, FREObject argv[]) {
@@ -342,7 +342,7 @@ FREObject GetThumbnailPhotoDimensions(FREContext ctx, void* funcData, uint32_t a
     return data;
 }
 
-// Draws the current loaded fullscreen asset into the passed BitmapData
+// Draws the current loaded asset into the passed BitmapData for the given type
 // params: BitmapData, type (thumbnail, fullScreen, fullResolution)
 FREObject DrawPhotoToBitmapData(FREContext ctx, void* funcData, uint32_t argc, FREObject argv[]) {
     
@@ -523,7 +523,7 @@ FREObject CountPhotos(FREContext ctx, void* funcData, uint32_t argc, FREObject a
         
             if (group == nil) {
                 NSString *result = [NSString stringWithFormat:@"%d",(int)images];
-                FREDispatchStatusEventAsync(g_ctx, (const uint8_t*)"COUNT_PHOTOS_COMPLETED", (uint8_t*)[result UTF8String]);
+                FREDispatchStatusEventAsync(g_ctx, (const uint8_t*)"countPhotosCompleted", (uint8_t*)[result UTF8String]);
             } else {
                 [group setAssetsFilter:[ALAssetsFilter allPhotos]];
                 images += group.numberOfAssets;
