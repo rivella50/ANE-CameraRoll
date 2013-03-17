@@ -16,6 +16,7 @@ package com.vlabs.ane.cameraroll
 		public static const EVENT_FULL_RESOLUTION_IMAGE_LOADED:String = "eventFullResolutionImageLoaded";
 		
 		public static const EVENT_DEFAULT_THUMBNAIL_DIMENSIONS_LOADED:String = "eventDefaultThumbnailDimensionsLoaded";
+		public static const EVENT_DEFAULT_THUMBNAIL_DIMENSIONS_NOT_LOADED:String = "eventDefaultThumbnailDimensionsNotLoaded";
 		
 		public function PhotoAppEvent(type:String, bubbles:Boolean=false, cancelable:Boolean=false)
 		{

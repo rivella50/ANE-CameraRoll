@@ -211,6 +211,8 @@ FREObject LoadPhotoAtIndex(FREContext ctx, void* funcData, uint32_t argc, FREObj
     FREGetObjectAsUTF8(argv[1], &notifyLength, &notify);
     NSString *notifyString = [NSString stringWithUTF8String:(char*)notify];
     
+    
+    
     [library enumerateGroupsWithTypes:ALAssetsGroupSavedPhotos usingBlock:^(ALAssetsGroup *group, BOOL *stop) {
         
         // Within the group enumeration block, filter to enumerate just photos.
@@ -219,15 +221,22 @@ FREObject LoadPhotoAtIndex(FREContext ctx, void* funcData, uint32_t argc, FREObj
         // Chooses the photo at the given index
         [group enumerateAssetsAtIndexes:[NSIndexSet indexSetWithIndex:index] options:0 usingBlock:^(ALAsset *asset, NSUInteger index, BOOL *innerStop) {
             
+            NSString *successValue;
             // The end of the enumeration is signaled by asset == nil.
             if (asset) {
                 currentAsset = asset;
                 //NSLog(@"The asset at index %d has been found", index);
-                FREDispatchStatusEventAsync(g_ctx, (const uint8_t*)[notifyString UTF8String], (uint8_t*)"");
+                successValue = @"OK";
+                FREDispatchStatusEventAsync(g_ctx, (const uint8_t*)[notifyString UTF8String], (uint8_t*)[successValue UTF8String]);
+            } else {
+                successValue = @"NOK";
+                FREDispatchStatusEventAsync(g_ctx, (const uint8_t*)[notifyString UTF8String], (uint8_t*)[successValue UTF8String]);
             }
         }];
     } failureBlock: ^(NSError *error) {
-        
+        NSString *successValue;
+        successValue = @"NOK";
+        FREDispatchStatusEventAsync(g_ctx, (const uint8_t*)[notifyString UTF8String], (uint8_t*)[successValue UTF8String]);
     }];
 
     //NSLog(@"Exiting LoadPhotoAtIndex()");

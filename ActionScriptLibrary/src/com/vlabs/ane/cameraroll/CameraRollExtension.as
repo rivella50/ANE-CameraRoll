@@ -29,13 +29,14 @@ package com.vlabs.ane.cameraroll
 		
 		private static const COUNT_PHOTOS_COMPLETED:String = "countPhotosCompleted";
 		
+		private static const REQUEST_SUCCESSFUL:String = "OK";
+		private static const REQUEST_FAILED:String = "NOK";
+		
 		private static var _instance:CameraRollExtension;
 		
 		private var _context:ExtensionContext;
 		
-		// since thumbnails all have the same dimensions we store it in context after first retrieval
-		private var _thumbnailWidth:int;
-		private var _thumbnailHeight:int;
+		
 		private var _photoType:String;
 		
 		public function CameraRollExtension()
@@ -104,7 +105,7 @@ package com.vlabs.ane.cameraroll
 					
 				} else {
 					
-					trace("there are no photos found in CameraRoll...");
+					//trace("there are no photos found in CameraRoll...");
 					var event:PhotoAppEvent = new PhotoAppEvent(PhotoAppEvent.EVENT_THUMBS_LOADED);
 					event.data = array;
 					dispatchEvent(event);
@@ -155,7 +156,7 @@ package com.vlabs.ane.cameraroll
 					
 				} else {
 					
-					trace("there are no photos for urls found in CameraRoll...");
+					//trace("there are no photos for urls found in CameraRoll...");
 					var event:PhotoAppEvent = new PhotoAppEvent(PhotoAppEvent.EVENT_THUMBS_FOR_URLS_LOADED);
 					event.data = array;
 					dispatchEvent(event);
@@ -193,10 +194,19 @@ package com.vlabs.ane.cameraroll
 				return;
 			} else if (e.code == LOAD_PHOTO_TYPE_THUMBNAIL_FOR_DIMENSIONS) {
 				
-				var dimensions:PhotoDimensions = getCurrentPhotoDimensions(PHOTO_TYPE_THUMBNAIL);
-				var event:PhotoAppEvent = new PhotoAppEvent(PhotoAppEvent.EVENT_DEFAULT_THUMBNAIL_DIMENSIONS_LOADED);
-				event.data = dimensions;
-				dispatchEvent(event);
+				// check if the photo could be loaded first
+				if (e.level == REQUEST_SUCCESSFUL) {
+				
+					var dimensions:PhotoDimensions = getCurrentPhotoDimensions(PHOTO_TYPE_THUMBNAIL);
+					var event:PhotoAppEvent = new PhotoAppEvent(PhotoAppEvent.EVENT_DEFAULT_THUMBNAIL_DIMENSIONS_LOADED);
+					event.data = dimensions;
+					dispatchEvent(event);
+				} else {
+					
+					var event:PhotoAppEvent = new PhotoAppEvent(PhotoAppEvent.EVENT_DEFAULT_THUMBNAIL_DIMENSIONS_NOT_LOADED);
+					dispatchEvent(event);
+				}
+				
 				return;
 			}
 
