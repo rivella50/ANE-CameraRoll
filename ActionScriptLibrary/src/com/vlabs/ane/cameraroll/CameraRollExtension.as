@@ -243,7 +243,7 @@ package com.vlabs.ane.cameraroll
 		}
 		
 		/**
-		 * Async counts the numer of photos in CameraRoll. Dispatches an event of type 
+		 * Async counts the numer of photos in CameraRoll. Dispatches an event of type COUNT_PHOTOS_COMPLETED
 		 */
 		public function countPhotos():void {
 			

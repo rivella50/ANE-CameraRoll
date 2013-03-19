@@ -795,7 +795,9 @@ void loadImagesForUrls(FREObject imageUrls, NSMutableArray *loadedImages, NSStri
                     }
                     
                     if (index == (arr_len - 1)) {
-                        NSString *result = [NSString stringWithFormat:@"%d",(int)arr_len];
+                        //NSString *result = [NSString stringWithFormat:@"%d",(int)arr_len];
+                        NSInteger numberOfPhotos = [loadedImages count];
+                        NSString *result = [NSString stringWithFormat:@"%d",(int)numberOfPhotos];
                         FREDispatchStatusEventAsync(g_ctx, (const uint8_t*)[notifyString UTF8String], (uint8_t*)[result UTF8String]);
                     }
                     
