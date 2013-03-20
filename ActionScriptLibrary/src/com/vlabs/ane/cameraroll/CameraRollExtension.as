@@ -85,7 +85,7 @@ package com.vlabs.ane.cameraroll
 						bitmap = new BitmapData(dimensions.width, dimensions.height);
 						//trace("bitmap: ", bitmap.width,"/", bitmap.height);
 						_context.call("drawThumbnailAtIndexToBitmapData", i, bitmap, _photoType);
-						object.thumbnail = bitmap;
+						object.photo = bitmap;
 						object.metadata = infos[i];
 						array.push(object);
 						
@@ -136,7 +136,7 @@ package com.vlabs.ane.cameraroll
 						dimensions = getPhotoDimensionsAtIndex(i, _photoType);
 						bitmap = new BitmapData(dimensions.width, dimensions.height);
 						_context.call("drawThumbnailAtIndexToBitmapData", i, bitmap, _photoType);
-						object.thumbnail = bitmap;
+						object.photo = bitmap;
 						object.metadata = infos[i];
 						array.push(object);
 						
@@ -164,34 +164,60 @@ package com.vlabs.ane.cameraroll
 				
 			} else if (e.code == LOAD_PHOTO_TYPE_THUMBNAIL) {
 				
-				var bitmap:BitmapData;
-				var dimensions:PhotoDimensions = getCurrentPhotoDimensions(PHOTO_TYPE_THUMBNAIL);
-				bitmap = new BitmapData(dimensions.width, dimensions.height);
-				drawPhotoToBitmapData(bitmap, PHOTO_TYPE_THUMBNAIL);
-				var event:PhotoAppEvent = new PhotoAppEvent(PhotoAppEvent.EVENT_THUMBNAIL_IMAGE_LOADED);
-				event.data = bitmap;
-				dispatchEvent(event);
+				if (e.level == REQUEST_SUCCESSFUL) {
+				
+					var bitmap:BitmapData;
+					var dimensions:PhotoDimensions = getCurrentPhotoDimensions(PHOTO_TYPE_THUMBNAIL);
+					bitmap = new BitmapData(dimensions.width, dimensions.height);
+					drawPhotoToBitmapData(bitmap, PHOTO_TYPE_THUMBNAIL);
+					var event:PhotoAppEvent = new PhotoAppEvent(PhotoAppEvent.EVENT_THUMBNAIL_IMAGE_LOADED);
+					event.data = bitmap;
+					dispatchEvent(event);
+				
+				} else {
+					
+					var event:PhotoAppEvent = new PhotoAppEvent(PhotoAppEvent.EVENT_THUMBNAIL_IMAGE_NOT_LOADED);
+					dispatchEvent(event);
+				}
 				return;
+				
 			} else if (e.code == LOAD_PHOTO_TYPE_FULL_SCREEN) {
 				
-				var bitmap:BitmapData;
-				var dimensions:PhotoDimensions = getCurrentPhotoDimensions(PHOTO_TYPE_FULL_SCREEN);
-				bitmap = new BitmapData(dimensions.width, dimensions.height);
-				drawPhotoToBitmapData(bitmap, PHOTO_TYPE_FULL_SCREEN);
-				var event:PhotoAppEvent = new PhotoAppEvent(PhotoAppEvent.EVENT_FULL_SCREEN_IMAGE_LOADED);
-				event.data = bitmap;
-				dispatchEvent(event);
+				if (e.level == REQUEST_SUCCESSFUL) {
+				
+					var bitmap:BitmapData;
+					var dimensions:PhotoDimensions = getCurrentPhotoDimensions(PHOTO_TYPE_FULL_SCREEN);
+					bitmap = new BitmapData(dimensions.width, dimensions.height);
+					drawPhotoToBitmapData(bitmap, PHOTO_TYPE_FULL_SCREEN);
+					var event:PhotoAppEvent = new PhotoAppEvent(PhotoAppEvent.EVENT_FULL_SCREEN_IMAGE_LOADED);
+					event.data = bitmap;
+					dispatchEvent(event);
+					
+				} else {
+					
+					var event:PhotoAppEvent = new PhotoAppEvent(PhotoAppEvent.EVENT_FULL_SCREEN_IMAGE_NOT_LOADED);
+					dispatchEvent(event);
+				}
 				return;
+				
 			} else if (e.code == LOAD_PHOTO_TYPE_FULL_RESOLUTION) {
 				
-				var bitmap:BitmapData;
-				var dimensions:PhotoDimensions = getCurrentPhotoDimensions(PHOTO_TYPE_FULL_RESOLUTION);
-				bitmap = new BitmapData(dimensions.width, dimensions.height);
-				drawPhotoToBitmapData(bitmap, PHOTO_TYPE_FULL_RESOLUTION);
-				var event:PhotoAppEvent = new PhotoAppEvent(PhotoAppEvent.EVENT_FULL_RESOLUTION_IMAGE_LOADED);
-				event.data = bitmap;
-				dispatchEvent(event);
+				if (e.level == REQUEST_SUCCESSFUL) {
+				
+					var bitmap:BitmapData;
+					var dimensions:PhotoDimensions = getCurrentPhotoDimensions(PHOTO_TYPE_FULL_RESOLUTION);
+					bitmap = new BitmapData(dimensions.width, dimensions.height);
+					drawPhotoToBitmapData(bitmap, PHOTO_TYPE_FULL_RESOLUTION);
+					var event:PhotoAppEvent = new PhotoAppEvent(PhotoAppEvent.EVENT_FULL_RESOLUTION_IMAGE_LOADED);
+					event.data = bitmap;
+					dispatchEvent(event);
+				} else {
+					
+					var event:PhotoAppEvent = new PhotoAppEvent(PhotoAppEvent.EVENT_FULL_RESOLUTION_IMAGE_NOT_LOADED);
+					dispatchEvent(event);
+				}	
 				return;
+				
 			} else if (e.code == LOAD_PHOTO_TYPE_THUMBNAIL_FOR_DIMENSIONS) {
 				
 				// check if the photo could be loaded first
@@ -310,7 +336,7 @@ package com.vlabs.ane.cameraroll
 		}
 		
 		/**
-		 * Async loads one photo asset from CameraRoll for the given url and the type thumbnail.
+		 * Async loads one photo asset from CameraRoll for the given CameraRoll index and the type thumbnail.
 		 */
 		public function loadThumbnailPhotoAtIndex(index:int, type:String = LOAD_PHOTO_TYPE_THUMBNAIL):void {
 			
@@ -318,7 +344,7 @@ package com.vlabs.ane.cameraroll
 		}
 		
 		/**
-		 * Async loads one photo asset from CameraRoll for the given url and the type fullscreen.
+		 * Async loads one photo asset from CameraRoll for the given CameraRoll index and the type fullscreen.
 		 */
 		public function loadFullScreenPhotoAtIndex(index:int, type:String = LOAD_PHOTO_TYPE_FULL_SCREEN):void {
 			
@@ -326,7 +352,7 @@ package com.vlabs.ane.cameraroll
 		}
 		
 		/**
-		 * Async loads one photo asset from CameraRoll for the given url and the type fullresolution.
+		 * Async loads one photo asset from CameraRoll for the given CameraRoll index and the type fullresolution.
 		 */
 		public function loadFullResolutionPhotoAtIndex(index:int, type:String = LOAD_PHOTO_TYPE_FULL_RESOLUTION):void {
 			

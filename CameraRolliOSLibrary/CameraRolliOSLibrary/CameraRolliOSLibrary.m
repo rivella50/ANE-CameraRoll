@@ -150,13 +150,21 @@ FREObject LoadPhotoForUrl(FREContext ctx, void* funcData, uint32_t argc, FREObje
     // now retrieve the image: http://stackoverflow.com/questions/7221167/how-to-check-if-an-alasset-still-exists-using-a-url
     NSURL *assetUrl = [NSURL URLWithString:urlString];
     [library assetForURL:assetUrl resultBlock:^(ALAsset *asset) {
+        NSString *successValue;
+        
         if (asset) {
             currentAsset = asset;
             //NSLog(@"The asset for url %@ has been found. Now notify for type %@ ", urlString, notifyString);
-            FREDispatchStatusEventAsync(g_ctx, (const uint8_t*)[notifyString UTF8String], (uint8_t*)"");
+            successValue = @"OK";
+            FREDispatchStatusEventAsync(g_ctx, (const uint8_t*)[notifyString UTF8String], (uint8_t*)[successValue UTF8String]);
+        } else {
+            successValue = @"NOK";
+            FREDispatchStatusEventAsync(g_ctx, (const uint8_t*)[notifyString UTF8String], (uint8_t*)[successValue UTF8String]);
         }
     } failureBlock:^(NSError *error) {
-        
+        NSString *successValue;
+        successValue = @"NOK";
+        FREDispatchStatusEventAsync(g_ctx, (const uint8_t*)[notifyString UTF8String], (uint8_t*)[successValue UTF8String]);
     }];
 
     //NSLog(@"Exiting LoadPhotoForUrl()");

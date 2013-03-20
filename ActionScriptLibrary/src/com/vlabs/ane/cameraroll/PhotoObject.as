@@ -3,21 +3,13 @@ package com.vlabs.ane.cameraroll
 	public class PhotoObject
 	{
 		private var _metadata:PhotoMetadata;
-		private var _thumbnail:Object; // can be BitmapData or ByteArray
+		private var _photo:Object; // can be BitmapData or ByteArray
 		
 		public function PhotoObject()
 		{
 		}
 
-		public function get thumbnail():Object
-		{
-			return _thumbnail;
-		}
-
-		public function set thumbnail(value:Object):void
-		{
-			_thumbnail = value;
-		}
+		
 
 		public function get metadata():PhotoMetadata
 		{
@@ -28,6 +20,17 @@ package com.vlabs.ane.cameraroll
 		{
 			_metadata = value;
 		}
+
+		public function get photo():Object
+		{
+			return _photo;
+		}
+
+		public function set photo(value:Object):void
+		{
+			_photo = value;
+		}
+
 
 	}
 }
