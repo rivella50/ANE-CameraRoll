@@ -83,6 +83,12 @@ package com.vlabs.ane.cameraroll
 			return [];
 		}
 		
+		
+		public function getCurrentPhotoInfo():PhotoMetadata {
+			
+			return null;
+		}
+		
 		public function loadThumbnailPhotoForUrl(url:String, type:String = LOAD_PHOTO_TYPE_THUMBNAIL):void {
 			
 		}

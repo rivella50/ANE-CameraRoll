@@ -6,6 +6,6 @@ package com.vlabs.ane.cameraroll
 	{
 		public var time:Number;
 		public var url:String;
-		
+		public var orientation:String;
 	}
 }

@@ -481,7 +481,7 @@ FREObject GetPhotoInfos(FREContext ctx, void* funcData, uint32_t argc, FREObject
     FRESetArrayLength(populatedArray, length);
     
     // now iterate over assets and get the infos we need
-    NSDictionary *metadata = nil; //asset.defaultRepresentation.metadata;
+    NSDictionary *metadata = nil;
     ALAsset *asset = nil;
     NSDate *date = nil;
     NSDateFormatter *dateFormatter = [NSDateFormatter new];
@@ -513,6 +513,11 @@ FREObject GetPhotoInfos(FREContext ctx, void* funcData, uint32_t argc, FREObject
         FRENewObjectFromUTF8(strlen(str)+1, (const uint8_t*)str, &urlStr);
         FRESetObjectProperty(data, (const uint8_t*)"url", urlStr, NULL);
         
+        // next the orientation
+        ALAssetOrientation assetOrientation = [[asset valueForProperty:@"ALAssetPropertyOrientation"] intValue];
+        FREObject orientationObject = nil;
+        FRENewObjectFromInt32(assetOrientation, &orientationObject);
+        FRESetObjectProperty(data, (const uint8_t*)"orientation", orientationObject, NULL);
         
         // and insert the data object into the array
         FRESetArrayElementAt(populatedArray, i, data);
@@ -525,6 +530,48 @@ FREObject GetPhotoInfos(FREContext ctx, void* funcData, uint32_t argc, FREObject
     return populatedArray;
 }
 
+// sync method which takes the current asset and returns its properties
+// params: -
+FREObject GetCurrentPhotoInfo(FREContext ctx, void* funcData, uint32_t argc, FREObject argv[]) {
+    
+    NSDictionary *metadata = nil;
+    NSDate *date = nil;
+    NSDateFormatter *dateFormatter = [NSDateFormatter new];
+    dateFormatter.dateFormat = @"y:MM:dd HH:mm:ss";
+    FREObject data = NULL;
+    
+    if (currentAsset) {
+        metadata = currentAsset.defaultRepresentation.metadata;
+        // http://stackoverflow.com/questions/6030384/alassetpropertydate-returns-wrong-date
+        date = [dateFormatter dateFromString:[[metadata objectForKey:@"{Exif}"] objectForKey:@"DateTimeOriginal"]];
+        FREObject freDate ;
+        FRENewObjectFromDate(date, &freDate);
+        
+        uint32_t arr_len = 20; // count of positions
+        
+        FRENewObject((const uint8_t*)"com.vlabs.ane.cameraroll.PhotoMetadata", 0, NULL, &data, NULL);
+        FRESetArrayLength(data, arr_len);
+        
+        // now set the date object
+        FRESetObjectProperty(data, (const uint8_t*)"time", freDate, NULL);
+        
+        // next we need the unique identifier url
+        NSURL *assetUrl = currentAsset.defaultRepresentation.url;
+        NSString *urlString = [assetUrl absoluteString];
+        // Convert Obj-C string to C UTF8String const char *str = [returnString UTF8String];
+        const char *str = [urlString UTF8String];
+        FREObject urlStr;
+        FRENewObjectFromUTF8(strlen(str)+1, (const uint8_t*)str, &urlStr);
+        FRESetObjectProperty(data, (const uint8_t*)"url", urlStr, NULL);
+        
+        // next the orientation
+        ALAssetOrientation assetOrientation = [[currentAsset valueForProperty:@"ALAssetPropertyOrientation"] intValue];
+        FREObject orientationObject = nil;
+        FRENewObjectFromInt32(assetOrientation, &orientationObject);
+        FRESetObjectProperty(data, (const uint8_t*)"orientation", orientationObject, NULL);
+    }
+    return data;
+}
 
 
 //
@@ -585,7 +632,7 @@ void CameraRollContextInitializer(void* extData, const uint8_t* ctxType, FRECont
     
     //NSLog(@"Entering CameraRollContextInitializer()");
     
-	*numFunctionsToTest = 14;
+	*numFunctionsToTest = 15;
     
 	FRENamedFunction* func = (FRENamedFunction*) malloc(sizeof(FRENamedFunction) * *numFunctionsToTest);
 	
@@ -641,10 +688,14 @@ void CameraRollContextInitializer(void* extData, const uint8_t* ctxType, FRECont
 	func[12].functionData = NULL;
 	func[12].function = &GetPhotoDimensionsAtIndex;
     
-	//Just for consistency with Android
-	func[13].name = (const uint8_t*) "initNativeCode";
+    func[13].name = (const uint8_t*) "getCurrentPhotoInfo";
 	func[13].functionData = NULL;
-	func[13].function = &InitNativeCode;   
+	func[13].function = &GetCurrentPhotoInfo;
+    
+	//Just for consistency with Android
+	func[14].name = (const uint8_t*) "initNativeCode";
+	func[14].functionData = NULL;
+	func[14].function = &InitNativeCode;
     
 	*functionsToSet = func;
     

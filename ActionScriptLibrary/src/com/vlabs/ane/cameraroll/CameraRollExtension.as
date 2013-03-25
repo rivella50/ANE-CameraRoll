@@ -166,12 +166,15 @@ package com.vlabs.ane.cameraroll
 				
 				if (e.level == REQUEST_SUCCESSFUL) {
 				
+					var object:PhotoObject = new PhotoObject();
 					var bitmap:BitmapData;
 					var dimensions:PhotoDimensions = getCurrentPhotoDimensions(PHOTO_TYPE_THUMBNAIL);
 					bitmap = new BitmapData(dimensions.width, dimensions.height);
 					drawPhotoToBitmapData(bitmap, PHOTO_TYPE_THUMBNAIL);
 					var event:PhotoAppEvent = new PhotoAppEvent(PhotoAppEvent.EVENT_THUMBNAIL_IMAGE_LOADED);
-					event.data = bitmap;
+					object.photo = bitmap;
+					object.metadata = getCurrentPhotoInfo();
+					event.data = object;
 					dispatchEvent(event);
 				
 				} else {
@@ -185,12 +188,15 @@ package com.vlabs.ane.cameraroll
 				
 				if (e.level == REQUEST_SUCCESSFUL) {
 				
+					var object:PhotoObject = new PhotoObject();
 					var bitmap:BitmapData;
 					var dimensions:PhotoDimensions = getCurrentPhotoDimensions(PHOTO_TYPE_FULL_SCREEN);
 					bitmap = new BitmapData(dimensions.width, dimensions.height);
 					drawPhotoToBitmapData(bitmap, PHOTO_TYPE_FULL_SCREEN);
 					var event:PhotoAppEvent = new PhotoAppEvent(PhotoAppEvent.EVENT_FULL_SCREEN_IMAGE_LOADED);
-					event.data = bitmap;
+					object.photo = bitmap;
+					object.metadata = getCurrentPhotoInfo();
+					event.data = object;
 					dispatchEvent(event);
 					
 				} else {
@@ -204,12 +210,15 @@ package com.vlabs.ane.cameraroll
 				
 				if (e.level == REQUEST_SUCCESSFUL) {
 				
+					var object:PhotoObject = new PhotoObject();
 					var bitmap:BitmapData;
 					var dimensions:PhotoDimensions = getCurrentPhotoDimensions(PHOTO_TYPE_FULL_RESOLUTION);
 					bitmap = new BitmapData(dimensions.width, dimensions.height);
 					drawPhotoToBitmapData(bitmap, PHOTO_TYPE_FULL_RESOLUTION);
 					var event:PhotoAppEvent = new PhotoAppEvent(PhotoAppEvent.EVENT_FULL_RESOLUTION_IMAGE_LOADED);
-					event.data = bitmap;
+					object.photo = bitmap;
+					object.metadata = getCurrentPhotoInfo();
+					event.data = object;
 					dispatchEvent(event);
 				} else {
 					
@@ -304,11 +313,20 @@ package com.vlabs.ane.cameraroll
 		
 		/**
 		 * Sync loads metadata for loaded photo assets.
-		 * Be careful: This call doesn't load photo assets, therefore you have to load the before that call!
+		 * Be careful: This call doesn't load photo assets, therefore you have to load them before that call!
 		 */
 		public function getPhotoInfos(startIndex:int, length:int):Array {
 			
 			return _context.call("getPhotoInfos", startIndex, length) as Array;
+		}
+		
+		/**
+		 * Sync loads metadata for the current loaded photo asset.
+		 * Be careful: This call doesn't load photo assets, therefore you have to load it before that call!
+		 */
+		public function getCurrentPhotoInfo():PhotoMetadata {
+			
+			return _context.call("getCurrentPhotoInfo", null) as PhotoMetadata;
 		}
 		
 		/**
