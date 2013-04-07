@@ -1,4 +1,136 @@
 h3. Air Native Extension for better support of mobile device's CameraRoll
 
-This native extension is not ready for use, so don't.
-When i have finished a functioning version i will post here guides and api.
+This native extension is still in work, so please be careful when including in your project!
+
+The following functions are available:
+
+h4. getInstance():CameraRollExtension
+
+Returns: A Singleton instance of CameraRollExtension
+
+h4. isSupported():Boolean
+
+Returns: A Boolean saying if this ANE can be used (true for iOS and Android devices)
+
+h4. initNativeCode():void
+
+Called internally after the extension context has been created
+
+h4. determineThumbnailDefaultDimensions():void
+
+If at least one image exists in CameraRoll the thumbnail dimensions are determined. Since this is an async
+call you have to register these two listeners:
+
+PhotoAppEvent.EVENT_DEFAULT_THUMBNAIL_DIMENSIONS_LOADED -> event.data contains a PhotoDimensions object
+PhotoAppEvent.EVENT_DEFAULT_THUMBNAIL_DIMENSIONS_NOT_LOADED -> normally no image has been found in CameraRoll
+
+h4. getCurrentPhotoDimensions(type:String = PHOTO_TYPE_THUMBNAIL):PhotoDimensions
+
+Gets the dimensions for the just loaded single photo asset of type thumbnail.
+
+h4. countPhotos():void
+
+Async call for getting the number of images in CameraRoll. Register this listener for getting notified:
+
+PhotoAppEvent.EVENT_COUNT_PHOTOS -> event.data contains the count as a String
+
+h4. loadThumbnailPhotoAssets(startIndex:int, amount:int, type:String = LOAD_PHOTO_TYPE_THUMBNAILS):void
+
+Async loads a number of photo assets (incl. some metadata) with offset startIndex of either type thumbnail (LOAD_PHOTO_TYPE_THUMBNAILS) or aspectRatioThumbnail (LOAD_PHOTO_TYPE_ASPECT_RATIO_THUMBNAILS).
+
+Register this listener for being notified about loading the list of images: PhotoAppEvent.EVENT_THUMBS_LOADED -> event.data contains an Array of PhotoObject objects,
+where 'photo' contains the loaded BitmapData and metadata a PhotoMetadata object.
+
+h4. loadThumbnailPhotoAssetsForUrls(urls:Array, type:String = LOAD_PHOTO_TYPE_THUMBNAILS_FOR_URLS):void
+
+Async loads a number of photo assets for the passed list of url's of either type thumbnail (LOAD_PHOTO_TYPE_THUMBNAILS) or aspectRatioThumbnail (LOAD_PHOTO_TYPE_ASPECT_RATIO_THUMBNAILS).
+
+Register this listener for being notified about loading the list of images: PhotoAppEvent.EVENT_THUMBS_FOR_URLS_LOADED -> event.data contains an Array of PhotoObject objects,
+where 'photo' contains the loaded BitmapData and metadata a PhotoMetadata object.
+
+h4. loadThumbnailPhotoForUrl(url:String, type:String = LOAD_PHOTO_TYPE_THUMBNAIL):void
+
+Async loads one photo asset (incl. some metadata) for the given url and the type thumbnail.
+
+Register these two listeners to be notified:
+
+PhotoAppEvent.EVENT_THUMBNAIL_IMAGE_LOADED -> event.data contains the loaded image in a PhotoObject object
+PhotoAppEvent.EVENT_THUMBNAIL_IMAGE_NOT_LOADED
+
+h4. loadFullScreenPhotoForUrl(url:String, type:String = LOAD_PHOTO_TYPE_FULL_SCREEN):void
+
+Async loads one photo asset for the given url and the type fullscreen.
+
+Register these two listeners to be notified:
+
+PhotoAppEvent.EVENT_FULL_SCREEN_IMAGE_LOADED -> event.data contains the loaded image in a PhotoObject object
+PhotoAppEvent.EVENT_FULL_SCREEN_IMAGE_NOT_LOADED
+
+h4. loadFullResolutionPhotoForUrl(url:String, type:String = LOAD_PHOTO_TYPE_FULL_RESOLUTION):void
+
+Async loads one photo asset for the given url and the type fullresolution.
+
+Register these two listeners to be notified:
+
+PhotoAppEvent.EVENT_FULL_RESOLUTION_IMAGE_LOADED -> event.data contains the loaded image in a PhotoObject object
+PhotoAppEvent.EVENT_FULL_RESOLUTION_IMAGE_NOT_LOADED
+
+h4. loadThumbnailPhotoAtIndex(index:int, type:String = LOAD_PHOTO_TYPE_THUMBNAIL):void
+
+Async loads one photo asset from CameraRoll for the given CameraRoll index and the type thumbnail.
+
+Register these two listeners to be notified:
+
+PhotoAppEvent.EVENT_THUMBNAIL_IMAGE_LOADED -> event.data contains the loaded image in a PhotoObject object
+PhotoAppEvent.EVENT_THUMBNAIL_IMAGE_NOT_LOADED
+
+h4. loadFullScreenPhotoAtIndex(index:int, type:String = LOAD_PHOTO_TYPE_FULL_SCREEN):void
+
+Async loads one photo asset from CameraRoll for the given CameraRoll index and the type fullscreen.
+
+Register these two listeners to be notified:
+
+PhotoAppEvent.EVENT_FULL_SCREEN_IMAGE_LOADED -> event.data contains the loaded image in a PhotoObject object
+PhotoAppEvent.EVENT_FULL_SCREEN_IMAGE_NOT_LOADED
+
+h4. loadFullResolutionPhotoAtIndex(index:int, type:String = LOAD_PHOTO_TYPE_FULL_RESOLUTION):void
+
+Async loads one photo asset from CameraRoll for the given CameraRoll index and the type fullresolution.
+
+Register these two listeners to be notified:
+
+PhotoAppEvent.EVENT_FULL_RESOLUTION_IMAGE_LOADED -> event.data contains the loaded image in a PhotoObject object
+PhotoAppEvent.EVENT_FULL_RESOLUTION_IMAGE_NOT_LOADED
+
+h4. getPhotoInfos(startIndex:int, length:int):Array
+
+Sync loads metadata for the just loaded photo assets.
+Be careful: This call doesn't load photo assets, therefore you have to load them before that call!
+
+h4. getCurrentPhotoInfo():PhotoMetadata
+
+Sync loads metadata for the just loaded photo asset.
+Be careful: This call doesn't load photo assets, therefore you have to load it before that call!
+
+
+
+h3. Please note
+
+This ANE has been written in combination with a iPhone app to get better support for that device's images in CameraRoll.
+The app offers a paging mechanism when the user wants to see more images than fit on one device screen.
+It is NOT RECOMMENDED to use this ANE when you want to load all existing images in CameraRoll in one step. The app could
+crash in such a circumstance due to memory issues.
+
+The iOS project has been built against iOS 4.3 Deployment Target.
+If you encounter problems or see improvements for stability and/or performance please fork this project or let me know by leaving a message.
+
+h3. Donate
+
+If you think this ANE is useful i would be grateful for a donation.
+!https://www.paypal.com/en_US/i/btn/btn_donateCC_LG.gif!:https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=H4E2FZVGJYYHL
+
+h3. License
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+
+Copyright (c) 2013 by Valentin Treu, released under the MIT license.
