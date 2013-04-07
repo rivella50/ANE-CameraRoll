@@ -127,7 +127,7 @@ If you encounter problems or see improvements for stability and/or performance p
 h3. Donate
 
 If you think this ANE is useful i would be grateful for a donation.
-!https://www.paypal.com/en_US/i/btn/btn_donateCC_LG.gif!:https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=H4E2FZVGJYYHL
+!https://www.paypalobjects.com/en_US/i/btn/btn_donate_LG.gif!:https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=H4E2FZVGJYYHL
 
 h3. License
 
