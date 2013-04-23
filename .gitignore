@@ -11,3 +11,7 @@ Release/build_ane.sh
 library.swf
 ios/library.swf
 xcuserdata
+AndroidLibrary/bin
+AndroidLibrary/gen
+AndroidLibrary/libs
+AndroidLibrary/res

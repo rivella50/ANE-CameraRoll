@@ -3,6 +3,14 @@ h3. Adobe Air Native Extension (ANE) for better support of mobile device's Camer
 This native extension is still in work, so please be careful when including in your project!
 At the moment it is available only for iOS, but it is planned to extend this project to work for Android devices as well.
 
+The "example":https://github.com/rivella50/ANE-CameraRoll/blob/master/Example/src/com/vlabs/ane/cameraroll/example/LoadImagesExample.as shows how to use the extension and uses these aspects:
+
+* Getting the default thumbnail dimensions
+* Loading a set of thumbnails by index and offset
+* Loading a set of thumbnails by their URLs
+* Loading a fullscreen image by the URL of the thumbnail metadata when clicking on a thumbnail
+
+
 The following functions are available:
 
 h4. getInstance():CameraRollExtension
